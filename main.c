@@ -1,17 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "pawnMoves.h"
 
 #define SIZE_BOARD 8
 #define NUMBER_OF_PAWN 32
+#define WHITE 0
+#define BLACK 1
 
-typedef struct Pawn Pawn;
-struct Pawn{
-    int cordX;
-    int cordY;
-    char* pawnName;
-    char boardRepresentation;
-    int teamColor;
-};
 
 void spawnChessPawn(char** chessBoard, Pawn* pawnArray){
     for (int i = 0; i < NUMBER_OF_PAWN; i++)
@@ -24,7 +19,15 @@ void spawnChessPawn(char** chessBoard, Pawn* pawnArray){
 }
 
 
-
+/* 
+Changer printChessBoard pour ne plus avoir char** chssBoard
+explication :
+Le but est de ne plus gérer l'affichage des pions en fonction d'un tableau mais de tout faire graphiquement
+printChessboard prendrait en argument le tableau des pièce pawnArray
+1-printChessBoard regarde les positions actuelle de chaque pions et les stock dans un tableau 
+2- a cahque tour de boucle si un pion est à la position actuel de la boucle affiche le pion en question 
+3- free le tableau parce que c cool de free
+*/
 
 
 
@@ -73,21 +76,24 @@ void moveNormalPawn(int cordX, int cordY, Pawn* pawn){
     printf("Has moved\n");
 }
 
+void invertCords(Pawn* pawn) {
+    int inversedCordY = 7 - pawn->cordY;
+    pawn->cordY = inversedCordY;
+}
+
 int main(){
     Pawn pawnArray[NUMBER_OF_PAWN] = {};
 
-    Pawn pawn = {.cordX = 0, .cordY = 0, .pawnName = "Pawn", .boardRepresentation = 'P', .teamColor = 1};
-    int inverseCordY = 7 - pawn.cordY;
-    pawn.cordY = inverseCordY;
+    Pawn pawn = {.cordX = 0, .cordY = 0, .pawnName = "Pawn", .boardRepresentation = 'P', .teamColor = BLACK};
+    invertCords(&pawn);
 
     for (int i = 0; i < NUMBER_OF_PAWN; i++)
     {
         pawnArray[i] = pawn;
     }
 
-    Pawn myTestPawn = {.cordX = 3, .cordY = 0, .pawnName = "Pawn", .boardRepresentation = 'O', .teamColor = 0};
-    int inverseCordY2 = 7 - myTestPawn.cordY;
-    myTestPawn.cordY = inverseCordY2;
+    Pawn myTestPawn = {.cordX = 3, .cordY = 0, .pawnName = "Pawn", .boardRepresentation = 'O', .teamColor = WHITE};
+    invertCords(&myTestPawn);
    
     pawnArray[0] = myTestPawn;
     /* 
