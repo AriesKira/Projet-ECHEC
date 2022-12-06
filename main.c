@@ -31,122 +31,124 @@ printChessboard prendrait en argument le tableau des pièce pawnArray
 
 
 
-void printChessBoard(char** chessBoard){
-    for (int y = 0; y < SIZE_BOARD; y++)
+void printChessBoard(Pawn pawnArray[NUMBER_OF_PAWN]){
+    for (int x = 0; x < SIZE_BOARD; x++) //Affichage console
     {
         printf("----");               
     }
     printf("\n"); 
-    
-    for (int i = 0; i < SIZE_BOARD; i++)
+
+    for (int x = 0; x < SIZE_BOARD; x++)
     {
         for (int y = 0; y < SIZE_BOARD; y++)
         {
-            printf("| ");            
-            printf("%c ", chessBoard[i][y]);            
-        }
-        printf("|\n");            
+            printf("| ");  //Affichage console
 
-        for (int y = 0; y < SIZE_BOARD; y++)
+            int hasFoundAPawn = 0; //Affichage console
+
+            for (int i = 0; i < NUMBER_OF_PAWN; i++)
+            {
+                //Inverser cordX = y et cordY = x pour avoir le plateau dans le bon sens
+                if (pawnArray[i].cordX == y && pawnArray[i].cordY == x)
+                {
+                    printf("%c ", pawnArray[i].boardRepresentation); //Affichage console
+                    hasFoundAPawn = 1;
+                    break;
+                }
+            }
+            if (hasFoundAPawn == 0) //Affichage console
+            {
+                printf("  ");
+            }
+        }
+        printf("|\n"); 
+
+        for (int y = 0; y < SIZE_BOARD; y++) //Affichage console
         {
             printf("----");               
         }
-        printf("\n");            
+        printf("\n");  
     }
 }
 
-void resetChessBoard(char** chessBoard){
-    for (int i = 0; i < SIZE_BOARD; i++)
-    {
-        for (int y = 0; y < SIZE_BOARD; y++)
-        {
-            chessBoard[i][y] = ' ';
-        }          
-    }
+int invertCords(int cordY) {
+    return 7 - cordY;
 }
 
 
-
-
-
-void moveNormalPawn(int cordX, int cordY, Pawn* pawn){
-    pawn->cordX = 3;
-    pawn->cordY = 3;
-
-    printf("Has moved\n");
-}
-
-void invertCords(Pawn* pawn) {
-    int inversedCordY = 7 - pawn->cordY;
-    pawn->cordY = inversedCordY;
-}
 
 int main(){
+
+    //Initialisation
     Pawn pawnArray[NUMBER_OF_PAWN] = {};
 
     Pawn pawn = {.cordX = 0, .cordY = 0, .pawnName = "Pawn", .boardRepresentation = 'P', .teamColor = BLACK};
-    invertCords(&pawn);
+    pawn.cordY = invertCords(pawn.cordY);
+   
+    //Temporaire
+    pawnArray[0] = pawn;
+
+    /* 
+        BOUCLE d'exécution :
+            fait apparaitre les pièce en fonction de leur cordonnées propres X
+            bouger les pions
+            afficher le plateau de jeu X
+    */
+
+    //Boucle de jeu
+    printChessBoard(pawnArray);
+
+    //Selection du pion
+    Pawn* pawnSelected;
+    int userCordX, userCordY;
+    printf("Choisissez la piece a bouger via ces positions X et Y (ex: 1 8): ");
+    scanf("%d %d", &userCordX, &userCordY);
+    userCordX--;
+    userCordY--;
 
     for (int i = 0; i < NUMBER_OF_PAWN; i++)
     {
-        pawnArray[i] = pawn;
+        printf("Pion nomme : \t%c\t %d %d\t(cordY to => invertCordY)\n", pawnArray[i].pawnName, pawnArray[i].cordX, pawnArray[i].cordY);
     }
 
-    Pawn myTestPawn = {.cordX = 3, .cordY = 0, .pawnName = "Pawn", .boardRepresentation = 'O', .teamColor = WHITE};
-    invertCords(&myTestPawn);
-   
-    pawnArray[0] = myTestPawn;
-    /* 
-        BOUCLE d'exécution :
-            reset le plateau de jeu
-            fait apparaitre les pièce en fonction de leur cordonnées propres
-            bouger les pions
-            afficher le plateau de jeu
-    */
-
-
-    /*
-        29/11/2022 :
-            - Création d'une première version de la struct Pawn
-            - Création de fonction test (movePawn)
-            - Création d'un tableau 2D dynamique, pour représenter le plateau, pour pouvoir facilement le mettre à jour dans les futures fonctions
-    */ 
-
-    char** chessBoard = NULL;
-    if ((chessBoard = (char**)malloc(sizeof(char*) * SIZE_BOARD)) == NULL)
+    if (userCordX < 0 || userCordX > 7 || userCordY < 0 || userCordY > 7)
     {
-        fprintf(stdout, "ERREUR : Allocation dynamique d'un pointeur a échoué");
-        exit(EXIT_FAILURE);
+        printf("Veuillez selectionnez des coordonnees correctes\n");
     }
-    for (int i = 0; i < SIZE_BOARD; i++)
-    {
-        if ((chessBoard[i] = (char*)malloc(sizeof(char) * SIZE_BOARD)) == NULL)
+    else{
+        for (int i = 0; i < NUMBER_OF_PAWN; i++)
         {
-            fprintf(stdout, "ERREUR : Allocation dynamique d'un pointeur a échoué");
-            exit(EXIT_FAILURE);
+            if(pawnArray[i].cordX == userCordX && pawnArray[i].cordY == invertCords(userCordY)){
+                pawnSelected = &pawnArray[i];
+                break;
+            }
         }
+        printf("Vous avez selectionnez le pion nomme : %s\n", pawnSelected->pawnName);
     }
 
-    //Faire les fonction implémentant la boucle de jeu primaire : ResetBoard, MoveNormalPawn, PrintBoard
-
-    chessBoard[0][0] = 'x';
-    printf("Cool: %c\n", chessBoard[0][0]);
-
-    resetChessBoard(chessBoard);
-    moveNormalPawn(myTestPawn.cordX, myTestPawn.cordY, &myTestPawn);
-
-    printf("Cordonnées de mon pawn test : %d et %d\n", myTestPawn.cordX, myTestPawn.cordY);
-    //
-    //Besoin de réattribuer mon test pawn à pawnArray à chaque mouvement
-    //Possible de le faire automatiquement dans la fonction
-    //
-    pawnArray[0] = myTestPawn;
-
-
-    spawnChessPawn(chessBoard, pawnArray);
-    printChessBoard(chessBoard);
     
     
+    //Deplacement du pion
+    printf("Choisissez la nouvelle position de cette piece en X et Y (ex: 1 8): ");
+    scanf("%d %d", &userCordX, &userCordY);
+    userCordX--;
+    userCordY--;
 
-    //printChessboard(chessboard);
+    if (userCordX < 0 || userCordX > 7 || userCordY < 0 || userCordY > 7)
+    {
+        printf("Veuillez selectionnez des coordonnees correctes\n");
+    }
+    else{
+        /*Calcul du vecteur de direction X et Y // Necessite d'être ramené entre -1 et 1
+        int moveDirX = userCordX - pawnSelected.cordX;
+        int moveDirY = userCordY - invertCords(pawnSelected.cordY);
+
+        printf("Vecteur de direction X et Y : \t %d %d", moveDirX, moveDirY);*/
+
+        //printf("Vecteur de direction X et Y : \t %d %d", userCordX, userCordY);
+
+        pawnSelected->cordX = userCordX;
+        pawnSelected->cordY = invertCords(userCordY);
+        printChessBoard(pawnArray);
+    }
 }
