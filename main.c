@@ -131,6 +131,12 @@ void pawnMovement(Pawn* pawnSelected){
             pawnSelected->cordX = userCordX;
             pawnSelected->cordY = invertCords(userCordY);
         }
+        else if(vectorDirX == 2 || vectorDirY == 1 || vectorDirX == 1 || vectorDirY == 2 || vectorDirX == -2 || vectorDirY == 1 || vectorDirX == -1 || vectorDirY == 2 ||
+        vectorDirX == -2 || vectorDirY == 1 || vectorDirX == -1 || vectorDirY == 2 || vectorDirX == -2 || vectorDirY == -1 || vectorDirX == -1 || vectorDirY == -2){
+            printf("Mouvement du cavalier : OK\n");
+            pawnSelected->cordX = userCordX;
+            pawnSelected->cordY = invertCords(userCordY);
+        }
         else{
             printf("Mouvement incorrecte\n");
         }
