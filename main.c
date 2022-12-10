@@ -120,41 +120,187 @@ void pawnMovement(Pawn* pawnSelected){
         vectorDirX = userCordX - pawnSelected->cordX;
         vectorDirY = invertCords(userCordY) - pawnSelected->cordY;
 
-        if (vectorDirX == vectorDirY || vectorDirX == -vectorDirY)
+        //Il faudrait nettoyer cette masse de code, la sectionnez en de plus petites fonction etc...
+        //Personnellement, le premiers switch sur (pawnSelected->pawnMovementType) est un peu inutile, mais je n'ai pas le temps de le refactorer
+        switch (pawnSelected->pawnMovementType)
         {
-            printf("Mouvement diagonale : OK\n");
-            pawnSelected->cordX = userCordX;
-            pawnSelected->cordY = invertCords(userCordY);
-        }
-        else if(vectorDirX == 0 || vectorDirY == 0){
-            printf("Mouvement verticale ou horizontale : OK\n");
-            pawnSelected->cordX = userCordX;
-            pawnSelected->cordY = invertCords(userCordY);
-        }
-        else if(vectorDirX == 2 || vectorDirY == 1 || vectorDirX == 1 || vectorDirY == 2 || vectorDirX == -2 || vectorDirY == 1 || vectorDirX == -1 || vectorDirY == 2 ||
-        vectorDirX == -2 || vectorDirY == 1 || vectorDirX == -1 || vectorDirY == 2 || vectorDirX == -2 || vectorDirY == -1 || vectorDirX == -1 || vectorDirY == -2){
-            printf("Mouvement du cavalier : OK\n");
-            pawnSelected->cordX = userCordX;
-            pawnSelected->cordY = invertCords(userCordY);
-        }
-        else{
-            printf("Mouvement incorrecte\n");
+            case 'X':
+                switch (pawnSelected->pawnFunction)
+                {
+                    case 'K':
+                        //Peut être mis dans une fonction : RestreignMovement 
+                        if (vectorDirX > 1)
+                        {
+                            vectorDirX = 1;
+                        }
+                        else if(vectorDirX < -1){
+                            vectorDirX = -1;
+                        }
+                        if (vectorDirY > 1)
+                        {
+                            vectorDirY = 1;
+                        }
+                        else if(vectorDirY < -1){
+                            vectorDirY = -1;
+                        }
+                        
+                        //Peut être mis dans une fonction : DiagonalMovement 
+                        if (vectorDirX == vectorDirY || vectorDirX == -vectorDirY)
+                        {
+                            printf("Mouvement diagonale lateral : OK\n");
+                            pawnSelected->cordX = pawnSelected->cordX + vectorDirX;
+                            pawnSelected->cordY = pawnSelected->cordY + vectorDirY;
+                        }
+                        else{
+                            printf("Les coordonnées ne sont pas bonnes pour cette pièces en particulier\t ERREUR : Diagonale Lateral\n");
+                        }
+                        break;
+
+                    case 'Q':
+
+                        //Peut être mis dans une fonction : DiagonalMovement 
+                        if (vectorDirX == vectorDirY || vectorDirX == -vectorDirY)
+                        {
+                            printf("Mouvement diagonale lateral : OK\n");
+                            pawnSelected->cordX = userCordX;
+                            pawnSelected->cordY = invertCords(userCordY);
+                        }
+                        else{
+                            printf("Les coordonnées ne sont pas bonnes pour cette pièces en particulier\t ERREUR : Diagonale Lateral\n");
+                        }
+                        break;
+                    
+                    default:
+                        printf("La pièce ne peut pas se déplacer en diagonale\n");
+                        break;
+                }
+                break;
+            case 'D':
+                switch (pawnSelected->pawnFunction)
+                {
+                    case 'J':
+
+                        //Peut être mis dans une fonction : DiagonalMovement 
+                        if (vectorDirX == vectorDirY || vectorDirX == -vectorDirY)
+                        {
+                            printf("Mouvement diagonale : OK\n");
+                            pawnSelected->cordX = userCordX;
+                            pawnSelected->cordY = invertCords(userCordY);
+                        }
+                        else{
+                            printf("Les coordonnées ne sont pas bonnes pour cette pièces en particulier\t ERREUR : Diagonale\n");
+                        }
+                        break;
+                    
+                    default:
+                        printf("La pièce ne peut pas se déplacer en diagonale\n");
+                        break;
+                }
+                break;
+            case 'L':
+                switch (pawnSelected->pawnFunction)
+                {
+                    case 'P':
+                        //Peut être mis dans une fonction : RestreignMovementPawnOnly
+                        if(pawnSelected->teamColor == BLACK && vectorDirY >= 2 && pawnSelected->cordY == 1)
+                        {
+                            vectorDirY = 2;
+                        }
+                        else if (vectorDirY <= -2 && pawnSelected->teamColor == WHITE && pawnSelected->cordY == 6)
+                        {
+                            vectorDirY = -2;
+                        }
+                        else if (vectorDirY > 1)
+                        {
+                            vectorDirY = 1;
+                        }
+                        else if(vectorDirY < -1)
+                        {
+                            vectorDirY = -1;
+                        }
+                        
+                        //Peut être mis dans une fonction : LateralMovementPawnOnly
+                        if(vectorDirX == 0 && vectorDirY >= 0 && pawnSelected->teamColor == BLACK){
+                            printf("Mouvement verticale ou horizontale : OK\n");
+                            pawnSelected->cordY = pawnSelected->cordY + vectorDirY;
+                        }
+                        else if(vectorDirX == 0 && vectorDirY <= 0 && pawnSelected->teamColor == WHITE){
+                            printf("Mouvement verticale ou horizontale : OK\n");
+                            pawnSelected->cordY = pawnSelected->cordY + vectorDirY;
+                        }
+                        else{
+                            printf("Les coordonnées ne sont pas bonnes pour cette pièces en particulier\t ERREUR : Laterale\n");
+                        }
+                        break;
+
+                    case 'T':
+                        //Peut être mis dans une fonction : LateralMovement
+                        if(vectorDirX == 0 || vectorDirY == 0){
+                            printf("Mouvement verticale ou horizontale : OK\n");
+                            pawnSelected->cordX = userCordX;
+                            pawnSelected->cordY = invertCords(userCordY);
+                        }
+                        else{
+                            printf("Les coordonnées ne sont pas bonnes pour cette pièces en particulier\t ERREUR : Laterale\n");
+                        }
+                        break;
+                    
+                    default:
+                        printf("La pièce ne peut pas se déplacer en diagonale\n");
+                        break;
+                }
+                break;
+            case 'C':
+                //Peut être mis dans une fonction : CavalryMovement
+                if(vectorDirX == 2 || vectorDirY == 1 || vectorDirX == 1 || vectorDirY == 2 || vectorDirX == -2 || vectorDirY == 1 || vectorDirX == -1 || vectorDirY == 2 ||
+                vectorDirX == -2 || vectorDirY == 1 || vectorDirX == -1 || vectorDirY == 2 || vectorDirX == -2 || vectorDirY == -1 || vectorDirX == -1 || vectorDirY == -2){
+                    printf("Mouvement du cavalier : OK\n");
+                    pawnSelected->cordX = userCordX;
+                    pawnSelected->cordY = invertCords(userCordY);
+                }
+                else{
+                    printf("Les coordonnées ne sont pas bonnes pour cette pièces en particulier\t ERREUR : Cavalier\n");
+                }
+                break;
+            
+            default:
+                printf("Erreur dans les nouvelles coordonnées\n");
+                break;
         }
     }
 }
 
+/*
 
+    OBJECTIFS DU JOUR :
+    - Programmer plusieurs pièces possèdant chacunes leurs propres mouvement :
+        - roi
+        - reine
+        - fou
+        - cavalier
+        - tour
+        - pion
+    
+    - Programmer les collisions entres chaques pièces
+
+*/
 
 int main(){
 
     //Initialisation
     Pawn pawnArray[NUMBER_OF_PAWN] = {};
 
-    Pawn pawn = {.cordX = 0, .cordY = 0, .pawnName = "Pawn", .boardRepresentation = 'P', .teamColor = BLACK};
+    Pawn pawn = {.cordX = 3, .cordY = 0, .pawnName = "King", .boardRepresentation = 'K', .teamColor = WHITE, .pawnFunction ='K', .pawnMovementType = 'X'};
     pawn.cordY = invertCords(pawn.cordY);
+    Pawn pawn2 = {.cordX = 7, .cordY = 7, .pawnName = "Pawn", .boardRepresentation = 'P', .teamColor = BLACK, .pawnFunction ='P', .pawnMovementType = 'L'};
+    pawn2.cordY = invertCords(pawn2.cordY);
+    Pawn pawn3 = {.cordX = 0, .cordY = 0, .pawnName = "Pawn", .boardRepresentation = 'P', .teamColor = WHITE, .pawnFunction ='P', .pawnMovementType = 'L'};
+    pawn3.cordY = invertCords(pawn3.cordY);
    
     //Temporaire
     pawnArray[0] = pawn;
+    pawnArray[1] = pawn2;
+    pawnArray[2] = pawn3;
 
     //Boucle de jeu
     do
