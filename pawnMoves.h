@@ -7,7 +7,6 @@ struct Pawn{
     int cordY;
     char* pawnName;
     char pawnFunction;
-    char pawnMovementType;
     char boardRepresentation;
     int teamColor;
 };
