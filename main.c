@@ -99,7 +99,7 @@ void pawnSelection(Pawn** pawnSelected, Pawn pawnArray[NUMBER_OF_PAWN]){
 
 /*
 
-    FONCTIONS EXCLUSIVES AUX PIONS
+    FONCTIONS EXCLUSIVES AUX MOUVEMENTS DES PIONS
 
 */
 int vectorDirCalculation(int isDirX, Pawn* pawnSelected, int userCord){
@@ -109,35 +109,167 @@ int vectorDirCalculation(int isDirX, Pawn* pawnSelected, int userCord){
         return pawnSelected->cordY - invertCords(userCord);
 }
 
-int isLateralMovementPossible(Pawn* pawnSelected, int userCordX, int userCordY){
+int vectorLimitation(int vectorToLimit, int greaterLimitation, int lowerLimitation){
+    if (vectorToLimit > greaterLimitation)
+        return greaterLimitation;
+    else if(vectorToLimit < lowerLimitation)
+        return lowerLimitation;
+}
+
+int isTowerMovementPossible(Pawn* pawnSelected, int userCordX, int userCordY){
     int vectorDirX = vectorDirCalculation(1, pawnSelected, userCordX);
     int vectorDirY = vectorDirCalculation(0, pawnSelected, userCordY);
 
     if(vectorDirX == 0 || vectorDirY == 0){
-        printf("Mouvement laterale de ' %s ' est possible\n", pawnSelected->pawnName);
+        printf("Mouvement tour de ' %s ' est possible\n", pawnSelected->pawnName);
         return 1;
     }
     else{
-        printf("Mouvement LETERALE IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
+        printf("Mouvement TOUR IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
         return 0;
     }
 }
 
-int isDiagonalMovementPossible(Pawn* pawnSelected, int userCordX, int userCordY){
+int isPawnMovementPossible(Pawn* pawnSelected, int userCordX, int* userCordY){
+    int vectorDirX = vectorDirCalculation(1, pawnSelected, userCordX);
+    int vectorDirY = vectorDirCalculation(0, pawnSelected, *userCordY);
+
+    if((pawnSelected->teamColor == BLACK && pawnSelected->cordY == 1) || (pawnSelected->teamColor == WHITE && pawnSelected->cordY == 6))
+        vectorDirY = vectorLimitation(vectorDirY, 2, -2);
+    else
+        vectorDirY = vectorLimitation(vectorDirY, 1, -1);
+
+    vectorDirY *= -1;
+
+    if(vectorDirX == 0 && vectorDirY > 0 && pawnSelected->teamColor == BLACK){
+        printf("Mouvement pion de ' %s ' est possible\n", pawnSelected->pawnName);
+        *userCordY = invertCords(pawnSelected->cordY) - vectorDirY;
+        return 1;
+    }
+    else if(vectorDirX == 0 && vectorDirY < 0 && pawnSelected->teamColor == WHITE){
+        printf("Mouvement pion de ' %s ' est possible\n", pawnSelected->pawnName);
+        *userCordY = invertCords(pawnSelected->cordY) - vectorDirY;
+        return 1;
+    }
+    else{
+        printf("Mouvement PION IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
+        return 0;
+    }
+}
+
+int isKingMovementPossible(Pawn* pawnSelected, int* userCordX, int* userCordY){
+    int vectorDirX = vectorDirCalculation(1, pawnSelected, *userCordX);
+    int vectorDirY = vectorDirCalculation(0, pawnSelected, *userCordY);
+
+    vectorDirX = vectorLimitation(vectorDirX, 1, -1);
+    vectorDirY = vectorLimitation(vectorDirY, 1, -1);
+
+    *userCordX = pawnSelected->cordX - vectorDirX;
+    *userCordY = invertCords(pawnSelected->cordY) + vectorDirY;
+
+    return 1;
+}
+
+int isBishopMovementPossible(Pawn* pawnSelected, int userCordX, int userCordY){
     int vectorDirX = vectorDirCalculation(1, pawnSelected, userCordX);
     int vectorDirY = vectorDirCalculation(0, pawnSelected, userCordY);
 
     if(vectorDirX == vectorDirY || vectorDirX == -vectorDirY){
-        printf("Mouvement diagonale de ' %s ' est possible\n", pawnSelected->pawnName);
+        printf("Mouvement fou de ' %s ' est possible\n", pawnSelected->pawnName);
         return 1;
     }
     else{
-        printf("Mouvement DIAGONAL IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
+        printf("Mouvement FOU IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
         return 0;
     }
 }
 
-void pawnMovement(Pawn* pawnSelected){
+int isKnightMovementPossible(Pawn* pawnSelected, int userCordX, int userCordY){
+    int vectorDirX = vectorDirCalculation(1, pawnSelected, userCordX);
+    int vectorDirY = vectorDirCalculation(0, pawnSelected, userCordY);
+
+    if(vectorDirX == 2 || vectorDirY == 1 || vectorDirX == 1 || vectorDirY == 2 || vectorDirX == -2 || vectorDirY == 1 || vectorDirX == -1 || vectorDirY == 2 ||
+        vectorDirX == -2 || vectorDirY == 1 || vectorDirX == -1 || vectorDirY == 2 || vectorDirX == -2 || vectorDirY == -1 || vectorDirX == -1 || vectorDirY == -2){
+        printf("Mouvement chevalier de ' %s ' est possible\n", pawnSelected->pawnName);
+        return 1;
+    }
+    else{
+        printf("Mouvement CHEVALIER IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
+        return 0;
+    }
+}
+
+
+
+/*
+
+    FONCTIONS EXCLUSIVES AUX COLLISIONS DES PIONS
+
+*/
+int isKnightCollisionValid(Pawn* pawnSelected, int userCordX, int userCordY, Pawn* pawnArray){
+    for (int i = 0; i < NUMBER_OF_PAWN; i++)
+    {
+        if (pawnSelected != &pawnArray[i] && (userCordX == pawnArray[i].cordX && invertCords(userCordY) == pawnArray[i].cordY))
+            return 0;
+    }
+    return 1;
+}
+
+int isAllPawnCollisionValid(Pawn* pawnSelected, int userCordX, int userCordY, Pawn* pawnArray){
+    int vectorDirX = vectorDirCalculation(1, pawnSelected, userCordX);
+    int vectorDirY = vectorDirCalculation(0, pawnSelected, userCordY);
+
+    vectorDirX = vectorLimitation(vectorDirX, 1, -1);
+    vectorDirY = vectorLimitation(vectorDirY, 1, -1);
+
+    printf("VECTEUR Y : %d\n", vectorDirY);
+
+    int lastCoordX, lastCoordY, newCordX, newCordY;
+    newCordX = pawnSelected->cordX - vectorDirX;
+    newCordY = invertCords(pawnSelected->cordY) + vectorDirY;
+
+    for (int t = 0; t < SIZE_BOARD; t++)
+    {
+        
+        //Check les coordonnées de toutes les pièces
+        for (int i = 0; i < NUMBER_OF_PAWN; i++)
+        {
+            printf("\tNOUVELLE COORDONNE X et Y : %d & %d\n", newCordX, newCordY);
+            printf("\tCOORDONNE SOUHAITE X et Y : %d & %d\n\n", userCordX, userCordY);
+
+            if ((newCordX == pawnArray[i].cordX && invertCords(newCordY) == pawnArray[i].cordY) && pawnSelected != &pawnArray[i])
+                return 0;
+            //printf("\tCOLLISION DETECTER AVEC %s EN : %d & %d\n\n", pawnArray[i].pawnName, userCordX, userCordY);
+        }
+
+        if(newCordX == userCordX && newCordY == userCordY)
+        {
+            printf("\tOK : %d & %d\n\n", userCordX, userCordY);
+            return 1;
+        }
+
+        printf("--------------------------------\n");
+        printf("VECTEUR X et Y : %d & %d\n", -vectorDirX, vectorDirY);
+        printf("--------------------------------\n");
+
+        //Met à jour les nouvelles coordonnées
+        newCordY += vectorDirY;
+        newCordX -= vectorDirX;
+    }
+}
+
+
+/*
+
+    FONCTIONS GENERALES AUX PIONS
+
+*/
+void movePawnFreely(Pawn* pawnSelected, int userCordX, int userCordY){
+    pawnSelected->cordX = userCordX;
+    pawnSelected->cordY = invertCords(userCordY);
+}
+
+void pawnMovement(Pawn* pawnSelected, Pawn pawnArray[NUMBER_OF_PAWN]){
     int userCordX, userCordY;
 
     printf("Choisissez la nouvelle position X et Y (ex: 1 8): ");
@@ -149,70 +281,56 @@ void pawnMovement(Pawn* pawnSelected){
 
     switch (pawnSelected->pawnFunction)
     {
-    case 'R':
-        isLateralMovementPossible(pawnSelected, userCordX, userCordY);
-        isDiagonalMovementPossible(pawnSelected, userCordX, userCordY);
-        break;
+        case 'K':
+            if (isKingMovementPossible(pawnSelected, &userCordX, &userCordY))
+                movePawnFreely(pawnSelected, userCordX, userCordY);
+            break;
 
-    case 'Q':
-        isLateralMovementPossible(pawnSelected, userCordX, userCordY);
-        isDiagonalMovementPossible(pawnSelected, userCordX, userCordY);
-        break;
+        case 'Q':
+            if(isTowerMovementPossible(pawnSelected, userCordX, userCordY) && isAllPawnCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+                movePawnFreely(pawnSelected, userCordX, userCordY);
+            else if(isBishopMovementPossible(pawnSelected, userCordX, userCordY)  && isAllPawnCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+                movePawnFreely(pawnSelected, userCordX, userCordY);
+            break;
 
-    case 'B':
-        isDiagonalMovementPossible(pawnSelected, userCordX, userCordY);
-        break;
+        case 'B':
+            if(isBishopMovementPossible(pawnSelected, userCordX, userCordY)  && isAllPawnCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+                movePawnFreely(pawnSelected, userCordX, userCordY);
+            break;
 
-    case 'C':
-        /* code */
-        break;
+        case 'C':
+            if(isKnightMovementPossible(pawnSelected, userCordX, userCordY) && isKnightCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+                movePawnFreely(pawnSelected, userCordX, userCordY);
+            break;
 
-    case 'T':
-        isLateralMovementPossible(pawnSelected, userCordX, userCordY);
-        break;
+        case 'T':
+            if(isTowerMovementPossible(pawnSelected, userCordX, userCordY) && isAllPawnCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+                movePawnFreely(pawnSelected, userCordX, userCordY);
+            break;
 
-    case 'P':
-        isLateralMovementPossible(pawnSelected, userCordX, userCordY);
-        break;
-    
-    default:
-        break;
+        case 'P':
+           if(isPawnMovementPossible(pawnSelected, userCordX, &userCordY)  && isAllPawnCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+                movePawnFreely(pawnSelected, userCordX, userCordY);
+            break;
+        
+        default:
+            break;
     }
 }
 
 
-/*
-
-    OBJECTIFS DU JOUR :
-    - Programmer plusieurs pièces possèdant chacunes leurs propres mouvement :
-        - roi
-        - reine
-        - fou
-        - cavalier
-        - tour
-        - pion
-    
-    - Programmer les collisions entres chaques pièces
-
-*/
 
 int main(){
-
     //Initialisation
-    Pawn pawnArray[NUMBER_OF_PAWN] = {};
+    Pawn pawnArray[NUMBER_OF_PAWN * 2] = {};
 
-    Pawn pawn = {.cordX = 0, .cordY = 3, .pawnName = "King", .boardRepresentation = 'K', .teamColor = WHITE, .pawnFunction ='K'};
-    pawn.cordY = invertCords(pawn.cordY);
-    Pawn pawn3 = {.cordX = 2, .cordY = 0, .pawnName = "Tower", .boardRepresentation = 'T', .teamColor = WHITE, .pawnFunction ='T'};
-    pawn3.cordY = invertCords(pawn3.cordY);
-
-    Pawn pawn2 = {.cordX = 0, .cordY = 0, .pawnName = "Queen", .boardRepresentation = 'Q', .teamColor = WHITE, .pawnFunction ='Q'};
-    pawn2.cordY = invertCords(pawn2.cordY);
-   
-    //Temporaire
-    pawnArray[0] = pawn;
-    pawnArray[1] = pawn3;
-    pawnArray[2] = pawn2;
+    for (int i = 0; i < NUMBER_OF_PAWN; i++)
+    {
+        Pawn pawn = {.cordX = i, .cordY = invertCords(1), .pawnName = "Pawn", .boardRepresentation = 'P', .teamColor = WHITE, .pawnFunction ='P'};
+        pawnArray[i] = pawn;
+    }
+    Pawn pawn = {.cordX = 0, .cordY = invertCords(3), .pawnName = "Fou", .boardRepresentation = 'B', .teamColor = WHITE, .pawnFunction ='B'};
+    pawnArray[8] = pawn;
 
     //Boucle de jeu
     do
@@ -220,12 +338,6 @@ int main(){
         printChessBoard(pawnArray);
         Pawn* pawnSelected = NULL;
         pawnSelection(&pawnSelected, pawnArray);
-        pawnMovement(pawnSelected);
+        pawnMovement(pawnSelected, pawnArray);
     } while (1 == 1);
-
-    /*
-        Boucle de jeu
-        Déplacement du personnages
-        Dégommage d'eux même
-    */
 }
