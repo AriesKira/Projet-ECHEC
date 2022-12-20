@@ -6,6 +6,8 @@
 #define NUMBER_OF_PAWN 32
 #define WHITE 0
 #define BLACK 1
+#define DEAD 2
+
 
 
 /*
@@ -13,7 +15,6 @@
     FONCTIONS GENERALE DU JEU
 
 */
-
 void printChessBoard(Pawn pawnArray[NUMBER_OF_PAWN]){
     for (int x = 0; x < SIZE_BOARD; x++) //Affichage console
     {
@@ -32,7 +33,7 @@ void printChessBoard(Pawn pawnArray[NUMBER_OF_PAWN]){
             for (int i = 0; i < NUMBER_OF_PAWN; i++)
             {
                 //Inverser cordX = y et cordY = x pour avoir le plateau dans le bon sens
-                if (pawnArray[i].cordX == y && pawnArray[i].cordY == x)
+                if (pawnArray[i].cordX == y && pawnArray[i].cordY == x && pawnArray[i].teamColor != DEAD)
                 {
                     printf("%c ", pawnArray[i].boardRepresentation); //Affichage console
                     hasFoundAPawn = 1;
@@ -61,9 +62,15 @@ void printChessBoard(Pawn pawnArray[NUMBER_OF_PAWN]){
     FONCTIONS GENERALES DES PIONS
 
 */
-
 int invertCords(int cordY) {
     return 7 - cordY;
+}
+
+int isPawnsFromTheSameTeam(Pawn* firstPawn, Pawn* secondPawn){
+    if (firstPawn->teamColor == secondPawn->teamColor)
+        return 1;
+    else
+        return 0;
 }
 
 int isNotInTheBoard(int userCordX, int userCordY){
@@ -96,6 +103,8 @@ void pawnSelection(Pawn** pawnSelected, Pawn pawnArray[NUMBER_OF_PAWN]){
         }
     }
 }
+
+
 
 /*
 
@@ -206,23 +215,30 @@ int isKnightMovementPossible(Pawn* pawnSelected, int userCordX, int userCordY){
     FONCTIONS EXCLUSIVES AUX COLLISIONS DES PIONS
 
 */
-int isKnightCollisionValid(Pawn* pawnSelected, int userCordX, int userCordY, Pawn* pawnArray){
+int isKnightCollisionValid(Pawn* pawnSelected, int* userCordX, int* userCordY, Pawn* pawnArray){
     for (int i = 0; i < NUMBER_OF_PAWN; i++)
     {
-        if (pawnSelected != &pawnArray[i] && (userCordX == pawnArray[i].cordX && invertCords(userCordY) == pawnArray[i].cordY))
-            return 0;
+        if (pawnSelected != &pawnArray[i] && (*userCordX == pawnArray[i].cordX && invertCords(*userCordY) == pawnArray[i].cordY)){
+            if(isPawnsFromTheSameTeam(pawnSelected, &pawnArray[i]))
+                return 0;
+            else
+                pawnArray[i].teamColor = DEAD;
+                *userCordX = pawnArray[i].cordX;
+                *userCordY = invertCords(pawnArray[i].cordY);
+                return 1;
+        }
     }
     return 1;
 }
 
-int isAllPawnCollisionValid(Pawn* pawnSelected, int userCordX, int userCordY, Pawn* pawnArray){
-    int vectorDirX = vectorDirCalculation(1, pawnSelected, userCordX);
-    int vectorDirY = vectorDirCalculation(0, pawnSelected, userCordY);
+int isAllPawnCollisionValid(Pawn* pawnSelected, int* userCordX, int* userCordY, Pawn* pawnArray){
+    int vectorDirX = vectorDirCalculation(1, pawnSelected, *userCordX);
+    int vectorDirY = vectorDirCalculation(0, pawnSelected, *userCordY);
 
     vectorDirX = vectorLimitation(vectorDirX, 1, -1);
     vectorDirY = vectorLimitation(vectorDirY, 1, -1);
 
-    printf("VECTEUR Y : %d\n", vectorDirY);
+    //printf("VECTEUR Y : %d\n", vectorDirY);
 
     int lastCoordX, lastCoordY, newCordX, newCordY;
     newCordX = pawnSelected->cordX - vectorDirX;
@@ -234,23 +250,32 @@ int isAllPawnCollisionValid(Pawn* pawnSelected, int userCordX, int userCordY, Pa
         //Check les coordonnées de toutes les pièces
         for (int i = 0; i < NUMBER_OF_PAWN; i++)
         {
-            printf("\tNOUVELLE COORDONNE X et Y : %d & %d\n", newCordX, newCordY);
-            printf("\tCOORDONNE SOUHAITE X et Y : %d & %d\n\n", userCordX, userCordY);
+            /*printf("\tNOUVELLE COORDONNE X et Y : %d & %d\n", newCordX, newCordY);
+            printf("\tCOORDONNE SOUHAITE X et Y : %d & %d\n\n", userCordX, userCordY);*/
 
-            if ((newCordX == pawnArray[i].cordX && invertCords(newCordY) == pawnArray[i].cordY) && pawnSelected != &pawnArray[i])
-                return 0;
+            if ((newCordX == pawnArray[i].cordX && invertCords(newCordY) == pawnArray[i].cordY) && pawnSelected != &pawnArray[i]){
+                if(isPawnsFromTheSameTeam(pawnSelected, &pawnArray[i]))
+                    return 0;
+                else
+                    printf("EAT MY PAWN\n");
+                    pawnArray[i].teamColor = DEAD;
+                    *userCordX = pawnArray[i].cordX;
+                    *userCordY = invertCords(pawnArray[i].cordY);
+                    return 1;
+            }
             //printf("\tCOLLISION DETECTER AVEC %s EN : %d & %d\n\n", pawnArray[i].pawnName, userCordX, userCordY);
         }
 
-        if(newCordX == userCordX && newCordY == userCordY)
+        if(newCordX == *userCordX && newCordY == *userCordY)
         {
-            printf("\tOK : %d & %d\n\n", userCordX, userCordY);
+            //printf("\tOK : %d & %d\n\n", userCordX, userCordY);
             return 1;
         }
 
+        /*
         printf("--------------------------------\n");
         printf("VECTEUR X et Y : %d & %d\n", -vectorDirX, vectorDirY);
-        printf("--------------------------------\n");
+        printf("--------------------------------\n");*/
 
         //Met à jour les nouvelles coordonnées
         newCordY += vectorDirY;
@@ -287,29 +312,29 @@ void pawnMovement(Pawn* pawnSelected, Pawn pawnArray[NUMBER_OF_PAWN]){
             break;
 
         case 'Q':
-            if(isTowerMovementPossible(pawnSelected, userCordX, userCordY) && isAllPawnCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+            if(isTowerMovementPossible(pawnSelected, userCordX, userCordY) && isAllPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray))
                 movePawnFreely(pawnSelected, userCordX, userCordY);
-            else if(isBishopMovementPossible(pawnSelected, userCordX, userCordY)  && isAllPawnCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+            else if(isBishopMovementPossible(pawnSelected, userCordX, userCordY)  && isAllPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray))
                 movePawnFreely(pawnSelected, userCordX, userCordY);
             break;
 
         case 'B':
-            if(isBishopMovementPossible(pawnSelected, userCordX, userCordY)  && isAllPawnCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+            if(isBishopMovementPossible(pawnSelected, userCordX, userCordY)  && isAllPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray))
                 movePawnFreely(pawnSelected, userCordX, userCordY);
             break;
 
         case 'C':
-            if(isKnightMovementPossible(pawnSelected, userCordX, userCordY) && isKnightCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+            if(isKnightMovementPossible(pawnSelected, userCordX, userCordY) && isKnightCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray))
                 movePawnFreely(pawnSelected, userCordX, userCordY);
             break;
 
         case 'T':
-            if(isTowerMovementPossible(pawnSelected, userCordX, userCordY) && isAllPawnCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+            if(isTowerMovementPossible(pawnSelected, userCordX, userCordY) && isAllPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray))
                 movePawnFreely(pawnSelected, userCordX, userCordY);
             break;
 
         case 'P':
-           if(isPawnMovementPossible(pawnSelected, userCordX, &userCordY)  && isAllPawnCollisionValid(pawnSelected, userCordX, userCordY, pawnArray))
+           if(isPawnMovementPossible(pawnSelected, userCordX, &userCordY)  && isAllPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray))
                 movePawnFreely(pawnSelected, userCordX, userCordY);
             break;
         
@@ -326,10 +351,10 @@ int main(){
 
     for (int i = 0; i < NUMBER_OF_PAWN; i++)
     {
-        Pawn pawn = {.cordX = i, .cordY = invertCords(1), .pawnName = "Pawn", .boardRepresentation = 'P', .teamColor = WHITE, .pawnFunction ='P'};
+        Pawn pawn = {.cordX = i, .cordY = 1, .pawnName = "Pawn", .boardRepresentation = 'B', .teamColor = BLACK, .pawnFunction ='P'};
         pawnArray[i] = pawn;
     }
-    Pawn pawn = {.cordX = 0, .cordY = invertCords(3), .pawnName = "Fou", .boardRepresentation = 'B', .teamColor = WHITE, .pawnFunction ='B'};
+    Pawn pawn = {.cordX = 0, .cordY = invertCords(3), .pawnName = "Fou", .boardRepresentation = 'G', .teamColor = WHITE, .pawnFunction ='B'};
     pawnArray[8] = pawn;
 
     //Boucle de jeu
