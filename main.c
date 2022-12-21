@@ -96,7 +96,7 @@ void pawnSelection(Pawn** pawnSelected, Pawn pawnArray[NUMBER_OF_PAWN]){
     
     for (int i = 0; i < NUMBER_OF_PAWN; i++)
     {
-        if(pawnArray[i].cordX == userCordX && pawnArray[i].cordY == invertCords(userCordY)){
+        if(pawnArray[i].cordX == userCordX && pawnArray[i].cordY == invertCords(userCordY) && pawnArray[i].teamColor != DEAD){
             *pawnSelected = &pawnArray[i];
             printf("Vous avez selectionnez le pion nomme : %s\n", (*pawnSelected)->pawnName);
             break;
@@ -231,6 +231,32 @@ int isKnightCollisionValid(Pawn* pawnSelected, int* userCordX, int* userCordY, P
     return 1;
 }
 
+int isPawnCollisionValid(Pawn* pawnSelected, int* userCordX, int* userCordY, Pawn* pawnArray){
+    int vectorDirX = vectorDirCalculation(1, pawnSelected, *userCordX);
+    int vectorDirY = vectorDirCalculation(0, pawnSelected, *userCordY);
+
+    for (int i = 0; i < NUMBER_OF_PAWN; i++)
+    {
+        if(pawnSelected->teamColor == WHITE && (pawnSelected->cordY - vectorDirY) == pawnArray[i].cordY && (pawnSelected->cordX - vectorDirX) == pawnArray[i].cordX && vectorDirX != 0)
+        {
+            printf("UN\n");
+            pawnArray[i].teamColor = DEAD;
+            *userCordX = pawnArray[i].cordX;
+            *userCordY = invertCords(pawnArray[i].cordY);
+            return 1;
+        }
+        else if(pawnSelected->teamColor == BLACK && (pawnSelected->cordY - vectorDirY) == pawnArray[i].cordY && (pawnSelected->cordX - vectorDirX) == pawnArray[i].cordX && vectorDirX != 0)
+        {
+            printf("DEUX\n");
+            pawnArray[i].teamColor = DEAD;
+            *userCordX = pawnArray[i].cordX;
+            *userCordY = invertCords(pawnArray[i].cordY);
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int isAllPawnCollisionValid(Pawn* pawnSelected, int* userCordX, int* userCordY, Pawn* pawnArray){
     int vectorDirX = vectorDirCalculation(1, pawnSelected, *userCordX);
     int vectorDirY = vectorDirCalculation(0, pawnSelected, *userCordY);
@@ -238,46 +264,32 @@ int isAllPawnCollisionValid(Pawn* pawnSelected, int* userCordX, int* userCordY, 
     vectorDirX = vectorLimitation(vectorDirX, 1, -1);
     vectorDirY = vectorLimitation(vectorDirY, 1, -1);
 
-    //printf("VECTEUR Y : %d\n", vectorDirY);
-
     int lastCoordX, lastCoordY, newCordX, newCordY;
     newCordX = pawnSelected->cordX - vectorDirX;
     newCordY = invertCords(pawnSelected->cordY) + vectorDirY;
 
     for (int t = 0; t < SIZE_BOARD; t++)
     {
-        
-        //Check les coordonnées de toutes les pièces
         for (int i = 0; i < NUMBER_OF_PAWN; i++)
         {
-            /*printf("\tNOUVELLE COORDONNE X et Y : %d & %d\n", newCordX, newCordY);
-            printf("\tCOORDONNE SOUHAITE X et Y : %d & %d\n\n", userCordX, userCordY);*/
-
             if ((newCordX == pawnArray[i].cordX && invertCords(newCordY) == pawnArray[i].cordY) && pawnSelected != &pawnArray[i]){
                 if(isPawnsFromTheSameTeam(pawnSelected, &pawnArray[i]))
                     return 0;
-                else
+                else if(!isPawnsFromTheSameTeam(pawnSelected, &pawnArray[i]) && pawnSelected->pawnFunction != 'P'){
                     printf("EAT MY PAWN\n");
                     pawnArray[i].teamColor = DEAD;
                     *userCordX = pawnArray[i].cordX;
                     *userCordY = invertCords(pawnArray[i].cordY);
                     return 1;
+                }
+                else
+                    return 0;
             }
-            //printf("\tCOLLISION DETECTER AVEC %s EN : %d & %d\n\n", pawnArray[i].pawnName, userCordX, userCordY);
         }
 
         if(newCordX == *userCordX && newCordY == *userCordY)
-        {
-            //printf("\tOK : %d & %d\n\n", userCordX, userCordY);
             return 1;
-        }
 
-        /*
-        printf("--------------------------------\n");
-        printf("VECTEUR X et Y : %d & %d\n", -vectorDirX, vectorDirY);
-        printf("--------------------------------\n");*/
-
-        //Met à jour les nouvelles coordonnées
         newCordY += vectorDirY;
         newCordX -= vectorDirX;
     }
@@ -334,7 +346,8 @@ void pawnMovement(Pawn* pawnSelected, Pawn pawnArray[NUMBER_OF_PAWN]){
             break;
 
         case 'P':
-           if(isPawnMovementPossible(pawnSelected, userCordX, &userCordY)  && isAllPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray))
+           if(isPawnMovementPossible(pawnSelected, userCordX, &userCordY)  && isAllPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray)
+            || isPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray))
                 movePawnFreely(pawnSelected, userCordX, userCordY);
             break;
         
@@ -351,10 +364,10 @@ int main(){
 
     for (int i = 0; i < NUMBER_OF_PAWN; i++)
     {
-        Pawn pawn = {.cordX = i, .cordY = 1, .pawnName = "Pawn", .boardRepresentation = 'B', .teamColor = BLACK, .pawnFunction ='P'};
+        Pawn pawn = {.cordX = i, .cordY = invertCords(6), .pawnName = "Pawn", .boardRepresentation = 'B', .teamColor = BLACK, .pawnFunction ='P'};
         pawnArray[i] = pawn;
     }
-    Pawn pawn = {.cordX = 0, .cordY = invertCords(3), .pawnName = "Fou", .boardRepresentation = 'G', .teamColor = WHITE, .pawnFunction ='B'};
+    Pawn pawn = {.cordX = 1, .cordY = invertCords(5), .pawnName = "Pion", .boardRepresentation = 'P', .teamColor = WHITE, .pawnFunction ='P'};
     pawnArray[8] = pawn;
 
     //Boucle de jeu
