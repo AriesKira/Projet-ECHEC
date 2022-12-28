@@ -82,26 +82,53 @@ int isNotInTheBoard(int userCordX, int userCordY){
     return 0;
 }
 
-void pawnSelection(Pawn** pawnSelected, Pawn pawnArray[NUMBER_OF_PAWN]){
-    int userCordX, userCordY;
-
-    printf("Choisissez la piece a bouger via ces coordonnees X et Y (ex: 1 8): ");
-    scanf("%d %d", &userCordX, &userCordY);
-    
-    userCordX--;
-    userCordY--;
-
-    if (isNotInTheBoard(userCordX, userCordY))
-        exit(EXIT_FAILURE); //A remplacer pour laisser le joueur choisir une autre pièce
-    
+int isWrongPawnSelected(int userCordX, int userCordY, Pawn pawnArray[NUMBER_OF_PAWN], int* indexPawn, int isItWhiteTurn){
     for (int i = 0; i < NUMBER_OF_PAWN; i++)
     {
         if(pawnArray[i].cordX == userCordX && pawnArray[i].cordY == invertCords(userCordY) && pawnArray[i].teamColor != DEAD){
-            *pawnSelected = &pawnArray[i];
-            printf("Vous avez selectionnez le pion nomme : %s\n", (*pawnSelected)->pawnName);
-            break;
+            if (isItWhiteTurn && pawnArray[i].teamColor == WHITE || !isItWhiteTurn && pawnArray[i].teamColor == BLACK){
+                *indexPawn = i;
+                return 0;
+            }       
+            else{
+                printf("Ce n'est pas le tour de cette equipe de jouer\n");
+                return 1;
+            }
         }
     }
+    printf("Il n'y a pas de pions a cette case\n");
+    return 1;
+}
+
+isPawnSelectionPuttingKingInDanger(){
+
+    /*
+        Pour cette partie la, simulez :
+        - Simulons chaque coup possible de l'équipe adverse
+            - Si un pion détecte que son mouvement : mange une pièce adverse + ce pion "pawnFunction" est K "ROI" => Refuser sélection de ce pions avec comme message :
+            "Votre roi est en échec\n"
+            - Sinon faire la sélection
+    */
+
+   
+
+    printf("Le roi n'est pas en danger\n");
+    return 0;
+}
+
+void pawnSelection(Pawn** pawnSelected, Pawn pawnArray[NUMBER_OF_PAWN], int isItWhiteTurn){
+    int userCordX, userCordY, indexPawn;
+
+    do
+    {
+        printf("Choisissez la piece a bouger via ces coordonnees X et Y (ex: 1 8): ");
+        scanf("%d %d", &userCordX, &userCordY);
+        
+        userCordX--;
+        userCordY--;
+    } while (isNotInTheBoard(userCordX, userCordY) || isWrongPawnSelected(userCordX, userCordY, pawnArray, &indexPawn, isItWhiteTurn) || isPawnSelectionPuttingKingInDanger());
+    *pawnSelected = &pawnArray[indexPawn];
+    printf("Vous avez selectionnez le pion nomme : %s\n", (*pawnSelected)->pawnName);
 }
 
 
@@ -130,11 +157,11 @@ int isTowerMovementPossible(Pawn* pawnSelected, int userCordX, int userCordY){
     int vectorDirY = vectorDirCalculation(0, pawnSelected, userCordY);
 
     if(vectorDirX == 0 || vectorDirY == 0){
-        printf("Mouvement tour de ' %s ' est possible\n", pawnSelected->pawnName);
+        //printf("Mouvement tour de ' %s ' est possible\n", pawnSelected->pawnName);
         return 1;
     }
     else{
-        printf("Mouvement TOUR IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
+        //printf("Mouvement TOUR IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
         return 0;
     }
 }
@@ -151,17 +178,17 @@ int isPawnMovementPossible(Pawn* pawnSelected, int userCordX, int* userCordY){
     vectorDirY *= -1;
 
     if(vectorDirX == 0 && vectorDirY > 0 && pawnSelected->teamColor == BLACK){
-        printf("Mouvement pion de ' %s ' est possible\n", pawnSelected->pawnName);
+        //printf("Mouvement pion de ' %s ' est possible\n", pawnSelected->pawnName);
         *userCordY = invertCords(pawnSelected->cordY) - vectorDirY;
         return 1;
     }
     else if(vectorDirX == 0 && vectorDirY < 0 && pawnSelected->teamColor == WHITE){
-        printf("Mouvement pion de ' %s ' est possible\n", pawnSelected->pawnName);
+        //printf("Mouvement pion de ' %s ' est possible\n", pawnSelected->pawnName);
         *userCordY = invertCords(pawnSelected->cordY) - vectorDirY;
         return 1;
     }
     else{
-        printf("Mouvement PION IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
+        //printf("Mouvement PION IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
         return 0;
     }
 }
@@ -184,11 +211,11 @@ int isBishopMovementPossible(Pawn* pawnSelected, int userCordX, int userCordY){
     int vectorDirY = vectorDirCalculation(0, pawnSelected, userCordY);
 
     if(vectorDirX == vectorDirY || vectorDirX == -vectorDirY){
-        printf("Mouvement fou de ' %s ' est possible\n", pawnSelected->pawnName);
+        //printf("Mouvement fou de ' %s ' est possible\n", pawnSelected->pawnName);
         return 1;
     }
     else{
-        printf("Mouvement FOU IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
+        //printf("Mouvement FOU IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
         return 0;
     }
 }
@@ -199,13 +226,30 @@ int isKnightMovementPossible(Pawn* pawnSelected, int userCordX, int userCordY){
 
     if(vectorDirX == 2 || vectorDirY == 1 || vectorDirX == 1 || vectorDirY == 2 || vectorDirX == -2 || vectorDirY == 1 || vectorDirX == -1 || vectorDirY == 2 ||
         vectorDirX == -2 || vectorDirY == 1 || vectorDirX == -1 || vectorDirY == 2 || vectorDirX == -2 || vectorDirY == -1 || vectorDirX == -1 || vectorDirY == -2){
-        printf("Mouvement chevalier de ' %s ' est possible\n", pawnSelected->pawnName);
+        //printf("Mouvement chevalier de ' %s ' est possible\n", pawnSelected->pawnName);
         return 1;
     }
     else{
-        printf("Mouvement CHEVALIER IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
+        //printf("Mouvement CHEVALIER IMPOSSIBLE POUR ' %s '\n", pawnSelected->pawnName);
         return 0;
     }
+}
+
+isPawnMovementPuttingKingInDanger(){
+
+    /*
+        Pour cette partie la, simulez :
+            - Désactivons la pièce
+            - Simulons chaque coup possible de l'équipe adverse
+                - Si un pion détecte que son mouvement : mange une pièce adverse + ce pion "pawnFunction" est K "ROI" => Refuser mouvement de ce pions avec comme message :
+                "Votre metteriez votre roi est en échec\n"
+                - Sinon faire le mouvement
+    */
+
+   
+
+    printf("Le roi n'est pas en danger\n");
+    return 0;
 }
 
 
@@ -239,7 +283,6 @@ int isPawnCollisionValid(Pawn* pawnSelected, int* userCordX, int* userCordY, Paw
     {
         if(pawnSelected->teamColor == WHITE && (pawnSelected->cordY - vectorDirY) == pawnArray[i].cordY && (pawnSelected->cordX - vectorDirX) == pawnArray[i].cordX && vectorDirX != 0)
         {
-            printf("UN\n");
             pawnArray[i].teamColor = DEAD;
             *userCordX = pawnArray[i].cordX;
             *userCordY = invertCords(pawnArray[i].cordY);
@@ -247,7 +290,6 @@ int isPawnCollisionValid(Pawn* pawnSelected, int* userCordX, int* userCordY, Paw
         }
         else if(pawnSelected->teamColor == BLACK && (pawnSelected->cordY - vectorDirY) == pawnArray[i].cordY && (pawnSelected->cordX - vectorDirX) == pawnArray[i].cordX && vectorDirX != 0)
         {
-            printf("DEUX\n");
             pawnArray[i].teamColor = DEAD;
             *userCordX = pawnArray[i].cordX;
             *userCordY = invertCords(pawnArray[i].cordY);
@@ -276,7 +318,6 @@ int isAllPawnCollisionValid(Pawn* pawnSelected, int* userCordX, int* userCordY, 
                 if(isPawnsFromTheSameTeam(pawnSelected, &pawnArray[i]))
                     return 0;
                 else if(!isPawnsFromTheSameTeam(pawnSelected, &pawnArray[i]) && pawnSelected->pawnFunction != 'P'){
-                    printf("EAT MY PAWN\n");
                     pawnArray[i].teamColor = DEAD;
                     *userCordX = pawnArray[i].cordX;
                     *userCordY = invertCords(pawnArray[i].cordY);
@@ -308,6 +349,58 @@ void movePawnFreely(Pawn* pawnSelected, int userCordX, int userCordY){
 
 void pawnMovement(Pawn* pawnSelected, Pawn pawnArray[NUMBER_OF_PAWN]){
     int userCordX, userCordY;
+
+    /*
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    FIXE LE FAIT D'ARRETER LE JEU SI ON CHOISI UNE MAUVAISE COORDONNEES
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    */
 
     printf("Choisissez la nouvelle position X et Y (ex: 1 8): ");
     scanf("%d %d", &userCordX, &userCordY);
@@ -346,8 +439,8 @@ void pawnMovement(Pawn* pawnSelected, Pawn pawnArray[NUMBER_OF_PAWN]){
             break;
 
         case 'P':
-           if(isPawnMovementPossible(pawnSelected, userCordX, &userCordY)  && isAllPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray)
-            || isPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray))
+           if((isPawnMovementPossible(pawnSelected, userCordX, &userCordY)  && isAllPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray)
+            || isPawnCollisionValid(pawnSelected, &userCordX, &userCordY, pawnArray)) && !isPawnMovementPuttingKingInDanger())
                 movePawnFreely(pawnSelected, userCordX, userCordY);
             break;
         
@@ -361,6 +454,7 @@ void pawnMovement(Pawn* pawnSelected, Pawn pawnArray[NUMBER_OF_PAWN]){
 int main(){
     //Initialisation
     Pawn pawnArray[NUMBER_OF_PAWN * 2] = {};
+    int isItWhiteTurn = 1;
 
     for (int i = 0; i < NUMBER_OF_PAWN; i++)
     {
@@ -375,7 +469,8 @@ int main(){
     {   
         printChessBoard(pawnArray);
         Pawn* pawnSelected = NULL;
-        pawnSelection(&pawnSelected, pawnArray);
+        pawnSelection(&pawnSelected, pawnArray, isItWhiteTurn);
         pawnMovement(pawnSelected, pawnArray);
+        isItWhiteTurn = (isItWhiteTurn - 1) * -1;
     } while (1 == 1);
 }
