@@ -7,6 +7,9 @@ struct Pawn{
     int cordY;
     char* pawnName;
     char pawnFunction;
+    //On peut remplacer pawnFunction par un score, mais c'est moins lisible pour nous les humains
+    int pawnScore;
+    int id;
     char boardRepresentation;
     int teamColor;
 };
