@@ -1,1 +1,1 @@
-isItWhiteTurn
+pawnSelection

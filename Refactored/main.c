@@ -45,11 +45,19 @@ int isWrongPawnSelected(int userCordX, int userCordY, Pawn chessboard[SIZE_BOARD
     {
         for (int x = 0; x < SIZE_BOARD; x++)
         {
-            if (userCordY == chessboard[y][x].cordY && userCordX == chessboard[y][x].cordX && chessboard[y][x].teamColor != DEAD)
+            if(userCordY == chessboard[y][x].cordY && userCordX == chessboard[y][x].cordX && chessboard[y][x].teamColor != DEAD)
             {
-                *returnX = x;
-                *returnY = y;
-                return 0;
+                if ((isItWhiteTurn == 1 && chessboard[y][x].teamColor == WHITE) ||
+                (isItWhiteTurn == 0 && chessboard[y][x].teamColor == BLACK))
+                {
+                    *returnX = x;
+                    *returnY = y;
+                    return 0;
+                }
+                else{
+                    printf("Ce n'est pas le tour de cette equipe\n");
+                    return 1;
+                }
             }
         }
     }
@@ -101,6 +109,47 @@ void pawnSelection(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int isItWhiteTurn, i
     } while (isNotInTheBoard(userCordX, userCordY) || isWrongPawnSelected(userCordX, userCordY, chessboard, indexY, indexX, isItWhiteTurn));
 }
 
+int pawnLogic(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int selectedPawnCordX, int selectedPawnCordY, int* moveToCordX, int* moveToCordY){
+    
+    switch (chessboard[selectedPawnCordY][selectedPawnCordX].pawnFunction)
+    {
+        case 'K':
+            if (isKingMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, *moveToCordX, *moveToCordY))
+                return 1;
+            break;
+
+        case 'Q':
+            if (isBishopMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY) ||
+            isTowerMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY))
+                return 1;
+            break;
+
+        case 'B':
+            if (isBishopMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY))
+                return 1;
+            break;
+
+        case 'C':
+            if (isKnightMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, *moveToCordX, *moveToCordY))
+                return 1;
+            break;
+
+        case 'T':
+            if (isTowerMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY))
+                return 1;
+            break;
+
+        case 'P':
+            if (isPawnMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, *moveToCordX, *moveToCordY))
+                return 1;
+            break;
+        
+        default:
+            break;
+    }
+    return 0;
+}
+
 void pawnMovement(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int selectedPawnCordX, int selectedPawnCordY){
 
     int moveToCordX, moveToCordY;
@@ -110,48 +159,15 @@ void pawnMovement(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int selectedPawnCordX
         scanf("%d %d", &moveToCordX, &moveToCordY);
         moveToCordX--;
         moveToCordY--;
-    } while (isNotInTheBoard(moveToCordX, moveToCordY));
+    } while (isNotInTheBoard(moveToCordX, moveToCordY) || !pawnLogic(chessboard, selectedPawnCordX, selectedPawnCordY, &moveToCordX, &moveToCordY));
 
-    switch (chessboard[selectedPawnCordY][selectedPawnCordX].pawnFunction)
-    {
-        /*
-            FAIRE EN SORTE QUE LES PIONS NE PEUVENT PAS MANGER LEURS ALLIES
-        */
+    /*
+        SOFT LOCK : si je choisi une pièce qui n'a aucun coup possible, je ne peux pas rechanger de pièce
+        Faire en sorte que si on selectionne deux fois les mêmes coordonnées (une fois durant la sélection et une fois durant le mouvement),
+        on en déduit que la personne veut déselectionner la pièce // Sinon vérifié si cette pièce peut se déplacer // Ou faire les deux
+    */
 
-        case 'K':
-            if (isKingMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY))
-                movePawnToDestination(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY);
-            break;
-
-        case 'Q':
-            if (isBishopMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, &moveToCordX, &moveToCordY) ||
-            isTowerMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, &moveToCordX, &moveToCordY))
-                movePawnToDestination(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY);
-            break;
-
-        case 'B':
-            if (isBishopMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, &moveToCordX, &moveToCordY))
-                movePawnToDestination(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY);
-            break;
-
-        case 'C':
-            if (isKnightMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY))
-                movePawnToDestination(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY);
-            break;
-
-        case 'T':
-            if (isTowerMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, &moveToCordX, &moveToCordY))
-                movePawnToDestination(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY);
-            break;
-
-        case 'P':
-            if (isPawnMovementValid(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY))
-                movePawnToDestination(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY);
-            break;
-        
-        default:
-            break;
-    }
+    movePawnToDestination(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY);
 }
 
 void movePawnToDestination(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int selectedPawnCordX, int selectedPawnCordY, int moveToCordX, int moveToCordY){
@@ -200,6 +216,7 @@ int isTowerMovementValid(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int selectedPa
             }
         }
     }
+    printf("Mouvement impossible, veuillez choisir des coordonnées valides pour cette pièce\n");
     return 0;
 }
 
@@ -271,19 +288,17 @@ int isPawnMovementValid(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int selectedPaw
     int lastVectorDirX = chessboard[selectedPawnCordY][selectedPawnCordX].cordX - moveToCordX;
     int lastVectorDirY = chessboard[selectedPawnCordY][selectedPawnCordX].cordY - moveToCordY;
 
-    printf("Y : %d\t X : %d\t COUELUR : %d\n", lastVectorDirY, lastVectorDirX, chessboard[selectedPawnCordY-1][selectedPawnCordX-lastVectorDirX].teamColor);
-
     if((chessboard[selectedPawnCordY][selectedPawnCordX].teamColor == WHITE && lastVectorDirX == 0 && lastVectorDirY == 1) &&
     (chessboard[selectedPawnCordY-lastVectorDirY][selectedPawnCordX].teamColor == DEAD))
         return 1;
     else if((chessboard[selectedPawnCordY][selectedPawnCordX].teamColor == BLACK && lastVectorDirX == 0 && lastVectorDirY == -1) &&
-    (chessboard[selectedPawnCordY+lastVectorDirY][selectedPawnCordX].teamColor == DEAD))
+    (chessboard[selectedPawnCordY-lastVectorDirY][selectedPawnCordX].teamColor == DEAD))
         return 1;
     else if((chessboard[selectedPawnCordY][selectedPawnCordX].teamColor == WHITE && (lastVectorDirX == 1 || lastVectorDirX == -1) && lastVectorDirY == 1) &&
     (chessboard[selectedPawnCordY-lastVectorDirY][selectedPawnCordX-lastVectorDirX].teamColor == BLACK))
         return 1;
     else if((chessboard[selectedPawnCordY][selectedPawnCordX].teamColor == BLACK && (lastVectorDirX == 1 || lastVectorDirX == -1) && lastVectorDirY == -1) &&
-    (chessboard[selectedPawnCordY+lastVectorDirY][selectedPawnCordX-lastVectorDirX].teamColor == WHITE))
+    (chessboard[selectedPawnCordY-lastVectorDirY][selectedPawnCordX-lastVectorDirX].teamColor == WHITE))
         return 1;
     else
         return 0;
@@ -379,5 +394,6 @@ int main(){
         pawnMovement(chessboard, returnedIndexCordX, returnedIndexCordY);
         //pawnMovement(chessboard);
         //isItWhiteTurn = (isItWhiteTurn - 1) * -1;
+        isItWhiteTurn = (isItWhiteTurn - 1) * -1;
     } while (1 == 1);
 }
