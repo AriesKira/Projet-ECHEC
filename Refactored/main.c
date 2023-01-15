@@ -150,7 +150,7 @@ int pawnLogic(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int selectedPawnCordX, in
     return 0;
 }
 
-void pawnMovement(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int selectedPawnCordX, int selectedPawnCordY){
+void pawnMovement(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int selectedPawnCordX, int selectedPawnCordY, int* isMouvementDone){
 
     int moveToCordX, moveToCordY;
     do
@@ -159,15 +159,20 @@ void pawnMovement(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int selectedPawnCordX
         scanf("%d %d", &moveToCordX, &moveToCordY);
         moveToCordX--;
         moveToCordY--;
+        printf("%d moveX %d\t %d moveY %d\n", selectedPawnCordX, moveToCordX, selectedPawnCordY, moveToCordY);
+
+        if (selectedPawnCordX == moveToCordX && selectedPawnCordY == moveToCordY)
+        {
+            *isMouvementDone = 0;
+            break;
+        }
     } while (isNotInTheBoard(moveToCordX, moveToCordY) || !pawnLogic(chessboard, selectedPawnCordX, selectedPawnCordY, &moveToCordX, &moveToCordY));
 
-    /*
-        SOFT LOCK : si je choisi une pièce qui n'a aucun coup possible, je ne peux pas rechanger de pièce
-        Faire en sorte que si on selectionne deux fois les mêmes coordonnées (une fois durant la sélection et une fois durant le mouvement),
-        on en déduit que la personne veut déselectionner la pièce // Sinon vérifié si cette pièce peut se déplacer // Ou faire les deux
-    */
-
-    movePawnToDestination(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY);
+    if (selectedPawnCordX != moveToCordX || selectedPawnCordY != moveToCordY)
+    {
+        movePawnToDestination(chessboard, selectedPawnCordX, selectedPawnCordY, moveToCordX, moveToCordY);
+        *isMouvementDone = 1;
+    }
 }
 
 void movePawnToDestination(Pawn chessboard[SIZE_BOARD][SIZE_BOARD], int selectedPawnCordX, int selectedPawnCordY, int moveToCordX, int moveToCordY){
@@ -386,14 +391,15 @@ int main(){
         }
     }
 
-    int returnedIndexCordX, returnedIndexCordY;
+    int returnedIndexCordX, returnedIndexCordY, isMouvementDone;
     do
     {   
         printChessBoard(chessboard);
-        pawnSelection(chessboard, isItWhiteTurn, &returnedIndexCordX, &returnedIndexCordY);
-        pawnMovement(chessboard, returnedIndexCordX, returnedIndexCordY);
-        //pawnMovement(chessboard);
-        //isItWhiteTurn = (isItWhiteTurn - 1) * -1;
+        do
+        {
+            pawnSelection(chessboard, isItWhiteTurn, &returnedIndexCordX, &returnedIndexCordY);
+            pawnMovement(chessboard, returnedIndexCordX, returnedIndexCordY, &isMouvementDone);
+        } while (isMouvementDone == 0);
         isItWhiteTurn = (isItWhiteTurn - 1) * -1;
     } while (1 == 1);
 }
