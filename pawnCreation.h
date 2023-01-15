@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+
 typedef struct pawn pawn;
 struct pawn {
     SDL_Rect basePosition;
@@ -13,16 +14,15 @@ struct pawn {
     int teamColor;
 };
 
+pawn ** pawnArray;
+pawn ERROR = {.type = "ERROR"};
+
 SDL_Texture* createFuncToUse(pawn* pawn,SDL_Window *window,SDL_Renderer *render);
 void funcNumb (char* pawnType,int pawnColor,int* value);
 void SDL_ExitWithError(const char* msg);
 SDL_Texture* createChessboard(SDL_Window *window,SDL_Renderer *render);
 SDL_Texture* createPawn(SDL_Window *window,SDL_Renderer *render,pawn* pawn);
-void createLWKnight(pawn* knight,SDL_Window *window,SDL_Renderer *render);
-void createRWKnight(pawn* knight,SDL_Window *window,SDL_Renderer *render);
-void createWQueen(pawn* queen,SDL_Window *window,SDL_Renderer *render);
 char* pawnNameAndColor(pawn* pawn);
-
 
 //-------TEXTURES-------------------------///
 void SDL_ExitWithError(const char* msg) {
@@ -218,5 +218,12 @@ char* pawnNameAndColor(pawn* pawn) {
         printf("Pion introuvable\n");
         return 0;
         break;
+    }
+}
+
+void displayAll(SDL_Window* window,SDL_Renderer* render) {
+    createChessboard(window,render);
+    for (int i = 0; i < sizeof(pawnArray)/2; i++) {
+        createPawn(window,render,pawnArray[i]);
     }
 }

@@ -1,15 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <SDL2/SDL.h>
-#include <stdbool.h>
-#include <string.h>
-#include "pawnCreation.h"
 #include "pawnMoves.h"
 
 #define Window_HEIGHT 900
 #define Window_WIDTH 1300
 
-pawn * pawnArray;
 
 
 int main(int argc, char** argv) {
@@ -17,18 +10,12 @@ int main(int argc, char** argv) {
     SDL_Renderer *rendu = NULL;
     SDL_Texture* chessboard = NULL;
     
-    pawnArray = malloc(sizeof(pawn)*32);
+    pawnArray = malloc(sizeof(pawn)*4);
     pawn LWknight;
     pawn RWknight;
     pawn Wqueen;
     pawn Bqueen;
     
-
-    pawnArray[0] = LWknight;
-    pawnArray[1] = RWknight;
-    pawnArray[2] = Wqueen;
-    pawnArray[3] = Bqueen;
-
     if(SDL_Init(SDL_INIT_VIDEO) !=0 ) {
         SDL_ExitWithError("Erreur initialisation SDL\n");
         return 0;
@@ -52,6 +39,11 @@ int main(int argc, char** argv) {
     pawnFiller(&Wqueen,"queen",0,510,720,window,rendu);
     pawnFiller(&Bqueen,"queen",1,510,90,window,rendu);
 
+    pawnArray[0] = &LWknight;
+    pawnArray[1] = &RWknight;
+    pawnArray[2] = &Wqueen;
+    pawnArray[3] = &Bqueen;
+
     SDL_RenderPresent(rendu);
     SDL_bool programLaunched = SDL_TRUE;
 
@@ -62,10 +54,25 @@ int main(int argc, char** argv) {
             switch (event.type) {
                 case SDL_MOUSEBUTTONDOWN:
                     switch (event.button.clicks) {
-                    case SDL_BUTTON_LEFT:
+                    case SDL_BUTTON_LEFT: {
+                        chessboardSquare chosenSquare;
                         printf("%d.%d\n",event.button.x,event.button.y);
+                        chosenSquare = selectedSquare(event.button.x,event.button.y);
+                        printf("%d / %d\n",chosenSquare.x, chosenSquare.y);
+                        pawn* chosenPawn = selectedPawn(chosenSquare);   
+                        if (strcmp(chosenPawn->type,"ERROR") == 0) {
+                            continue;
+                        }else{
+                            pawn tmpPawn = {.CurrentPosition.x = chosenPawn->CurrentPosition.x,.CurrentPosition.y = chosenPawn->CurrentPosition.y};
+                            printf("%s\n",chosenPawn->type);
+                            if (strcmp(chosenPawn->type,"knight")==0) {
+                                knghtAllowedMoves(tmpPawn,window,rendu);
+                            }
+                            
+                        }
+                        
                         continue;
-                    
+                    }
                     default:
                         break;
                     }
@@ -76,30 +83,6 @@ int main(int argc, char** argv) {
                         case SDLK_ESCAPE:
                             printf("fin du programme");
                             programLaunched = SDL_FALSE;
-                            break;
-                        case SDLK_z:
-                            SDL_RenderClear(rendu);
-                            createChessboard(window,rendu);
-                            moveUp(&LWknight,window,rendu);
-                            SDL_RenderPresent(rendu);
-                            break;
-                        case SDLK_d:
-                            SDL_RenderClear(rendu);
-                            createChessboard(window,rendu);
-                            moveRight(&LWknight,window,rendu);
-                            SDL_RenderPresent(rendu);
-                            break;
-                        case SDLK_s:
-                            SDL_RenderClear(rendu);
-                            createChessboard(window,rendu);
-                            moveDown(&LWknight,window,rendu);
-                            SDL_RenderPresent(rendu);
-                            break;
-                        case SDLK_q:
-                            SDL_RenderClear(rendu);
-                            createChessboard(window,rendu);
-                            moveLeft(&LWknight,window,rendu);
-                            SDL_RenderPresent(rendu);
                             break;
                         default:
                             
