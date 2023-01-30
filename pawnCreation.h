@@ -222,8 +222,11 @@ char* pawnNameAndColor(pawn* pawn) {
 }
 
 void displayAll(SDL_Window* window,SDL_Renderer* render) {
+
+    SDL_RenderClear(render);
     createChessboard(window,render);
     for (int i = 0; i < sizeof(pawnArray)/2; i++) {
         createPawn(window,render,pawnArray[i]);
     }
+    SDL_RenderPresent(render);
 }
