@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     if(SDL_Init(SDL_INIT_VIDEO) !=0 ) {
         SDL_ExitWithError("Erreur initialisation SDL\n");
         return 0;
-#define NB_CELL_PER_SIDE 8
+
     }
 
     if (SDL_CreateWindowAndRenderer(Window_WIDTH,Window_HEIGHT,0,&window,&baseRender)!=0) {
