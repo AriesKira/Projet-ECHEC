@@ -19,6 +19,7 @@ int main(int argc, char** argv) {
     if(SDL_Init(SDL_INIT_VIDEO) !=0 ) {
         SDL_ExitWithError("Erreur initialisation SDL\n");
         return 0;
+#define NB_CELL_PER_SIDE 8
     }
 
     if (SDL_CreateWindowAndRenderer(Window_WIDTH,Window_HEIGHT,0,&window,&rendu)!=0) {
@@ -43,22 +44,22 @@ int main(int argc, char** argv) {
     pawnArray[1] = &RWknight;
     pawnArray[2] = &Wqueen;
     pawnArray[3] = &Bqueen;
+    generateChessboardSquareArray();
 
     SDL_RenderPresent(rendu);
     SDL_bool programLaunched = SDL_TRUE;
 
     while (programLaunched) {
         SDL_Event event;
-
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_MOUSEBUTTONDOWN:
                     switch (event.button.clicks) {
                     case SDL_BUTTON_LEFT: {
                         chessboardSquare chosenSquare;
-                        printf("%d.%d\n",event.button.x,event.button.y);
+                        //printf("Position curseur X : (%d, %d)\n",event.button.x,event.button.y);
                         chosenSquare = selectedSquare(event.button.x,event.button.y);
-                        printf("%d / %d\n",chosenSquare.x, chosenSquare.y);
+                        printf("\nPosition case X :(%d, %d)\n\n",chosenSquare.x, chosenSquare.y);
                         pawn* chosenPawn = selectedPawn(chosenSquare);   
                         if (strcmp(chosenPawn->type,"ERROR") == 0) {
                             continue;
