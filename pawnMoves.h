@@ -14,7 +14,7 @@ struct chessboardSquare {
 };
 
 //-----------------BOARD MANAGEMENT---------------//
-
+chessboardSquare allowedMoves[27];
 chessboardSquare chessboard[NB_CELL_PER_SIDE][NB_CELL_PER_SIDE];
 
 void generateChessboardSquareArray(){
