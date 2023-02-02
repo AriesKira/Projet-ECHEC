@@ -14,50 +14,36 @@ struct chessboardSquare {
 };
 
 //-----------------BOARD MANAGEMENT---------------//
-chessboardSquare allowedMoves[27];
+chessboardSquare allowedMoves[28];
 chessboardSquare chessboard[NB_CELL_PER_SIDE][NB_CELL_PER_SIDE];
 
-void generateChessboardSquareArray(){
-    for (int rowX = 0; rowX < NB_CELL_PER_SIDE; rowX++)
-    {
-        for (int rowY = 0; rowY < NB_CELL_PER_SIDE; rowY++)
-        {
+void generateChessboardSquareArray() {
+    for (int rowX = 0; rowX < NB_CELL_PER_SIDE; rowX++) {
+        for (int rowY = 0; rowY < NB_CELL_PER_SIDE; rowY++) {
             chessboard[rowX][rowY].x = (LEFT_SIDE + 1) + (rowX * CELL_SIZE);
             chessboard[rowX][rowY].y = (TOP_SIDE + 1) + (rowY * CELL_SIZE);
-            printf("\nX : %d   Y : %d\n", rowX, rowY);
         }
     }
 }
 
 
 chessboardSquare selectedSquare(int selectedX,int selectedY){
-    for (int rowX = 0; rowX < NB_CELL_PER_SIDE; rowX++)
-    {
-        for (int rowY = 0; rowY < NB_CELL_PER_SIDE; rowY++)
-        {
-
-            /*
-                Ici, je rajoute des +1 après chaque FLAG car les flag de base (TOP_SIDE...) ne sont pas des valeur pile sur 90 (TOP_SIDE = 89 au lieu de 90)
-            */
-
-            if (selectedX < (LEFT_SIDE + 1) || selectedX > (RIGHT_SIDE + 1))
-            {
+    for (int rowX = 0; rowX < NB_CELL_PER_SIDE; rowX++) {
+        for (int rowY = 0; rowY < NB_CELL_PER_SIDE; rowY++) {
+            if (selectedX < (LEFT_SIDE + 1) || selectedX > (RIGHT_SIDE + 1)) {
                 chessboardSquare ERROR = {.x = 0,.y = 0};
                 printf("Erreur Coordonnées INVALIDE\n");
                 return ERROR;
             }
 
-            if (selectedY < (TOP_SIDE + 1) || selectedY > (BOTTOM_SIDE + 1))
-            {
+            if (selectedY < (TOP_SIDE + 1) || selectedY > (BOTTOM_SIDE + 1)) {
                 chessboardSquare ERROR = {.x = 0,.y = 0};
                 printf("Erreur Coordonnées INVALIDE\n");
                 return ERROR;
             }
 
-            if (selectedX >= (rowX * CELL_SIZE + (LEFT_SIDE + 1)) && selectedX < ((rowX+1) * CELL_SIZE + (LEFT_SIDE + 1)))
-            {
-                if (selectedY >= (rowY * CELL_SIZE + (TOP_SIDE + 1)) && selectedY < ((rowY+1) * CELL_SIZE + (TOP_SIDE + 1)))
-                {
+            if (selectedX >= (rowX * CELL_SIZE + (LEFT_SIDE + 1)) && selectedX < ((rowX+1) * CELL_SIZE + (LEFT_SIDE + 1))) {
+                if (selectedY >= (rowY * CELL_SIZE + (TOP_SIDE + 1)) && selectedY < ((rowY+1) * CELL_SIZE + (TOP_SIDE + 1))) {
                     //printf("\n\n(%d, %d)\n\n", rowX, rowY);
                     return chessboard[rowX][rowY];
                 }
@@ -83,6 +69,7 @@ int selectedPawn(chessboardSquare selectedSquare,bool colorPlaying) {
 int isValidMove(pawn pawn,bool colorPlaying) {
     chessboardSquare pawnsSquare = {.x = pawn.CurrentPosition.x,.y = pawn.CurrentPosition.y};
     int hasPawn;
+    int pawnType;
     hasPawn = selectedPawn(pawnsSquare,colorPlaying);
     if (pawn.CurrentPosition.x >= RIGHT_SIDE) {
         return 0;
@@ -98,10 +85,12 @@ int isValidMove(pawn pawn,bool colorPlaying) {
     }
     if (hasPawn != -2 && hasPawn != -1) {
         if (pawnArray[hasPawn]->teamColor == pawn.teamColor) {
-            return 0;
+            return -1;
         }
     }
-    
+    if (hasPawn == -2) {
+        return 2;
+    }
     
     return 1;
 }
@@ -112,12 +101,12 @@ int isValidMove(pawn pawn,bool colorPlaying) {
 void knightAllowedMoves(pawn knight,bool colorPlaying,SDL_Window* window,SDL_Renderer* render) {
     int i = 0;
     chessboardSquare allowedMoveFiller = {.x = 0,.y = 0};
-    SDL_Rect displayer;
-    displayer.h = 89;
-    displayer.w = 89;
+    struct displayer {
+        int x;
+        int y;
+    }displayer;
     pawn baseKnight = knight;
-    displayAll(window,render);
-    SDL_SetRenderDrawColor(render, 150, 0, 0, 0);
+    
 
     // MOVE 1
     int dx[] = {-2, -2, -1, -1, 1, 1, 2, 2};
@@ -125,19 +114,18 @@ void knightAllowedMoves(pawn knight,bool colorPlaying,SDL_Window* window,SDL_Ren
     for (int j = 0; j < 8; j++) {
         knight.CurrentPosition.x += dx[j] * 90;
         knight.CurrentPosition.y += dy[j] * 90;
-        if (isValidMove(knight,colorPlaying)) {
+        if (isValidMove(knight,colorPlaying) == 1 || isValidMove(knight,colorPlaying) == 2) {
             displayer.x = knight.CurrentPosition.x;
             displayer.y = knight.CurrentPosition.y;
             allowedMoveFiller = selectedSquare(displayer.x, displayer.y+1);
             allowedMoves[i] = allowedMoveFiller;
             i++;
-            SDL_RenderFillRect(render, &displayer);
         }
         knight.CurrentPosition.x = baseKnight.CurrentPosition.x;
         knight.CurrentPosition.y = baseKnight.CurrentPosition.y;
     }
     // Afficher les mouvements possibles
-    SDL_RenderPresent(render);
+
 
 }
 void queenAllowedMoves(pawn queen,bool colorPlaying,SDL_Window* window,SDL_Renderer* render) {
@@ -145,21 +133,32 @@ void queenAllowedMoves(pawn queen,bool colorPlaying,SDL_Window* window,SDL_Rende
     int move = 90;
     int i = 0;
     chessboardSquare allowedMoveFiller = {.x = 0,.y = 0};
-    SDL_Rect displayer;
-    displayer.h = 89;
-    displayer.w = 89;
-    displayAll(window,render);
+    struct displayer{
+        int x;
+        int y;
+    }displayer;
+   
     SDL_SetRenderDrawColor(render, 150, 0, 0, 0);
     //Move UP
     for (int j = 1; queen.CurrentPosition.y >= TOP_SIDE; j++) {
         queen.CurrentPosition.y -= move;
-        if (isValidMove(queen,colorPlaying)) {
+        if (isValidMove(queen,colorPlaying) == 1) {
             displayer.x = queen.CurrentPosition.x;
             displayer.y = queen.CurrentPosition.y;
             allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
             allowedMoves[i] = allowedMoveFiller;
             i++;
-            SDL_RenderFillRect(render,&displayer);
+        }
+        if (isValidMove(queen,colorPlaying) == 2) {
+            displayer.x = queen.CurrentPosition.x;
+            displayer.y = queen.CurrentPosition.y;
+            allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
+            allowedMoves[i] = allowedMoveFiller;
+            i++;
+            break;
+        }
+        if (isValidMove(queen,colorPlaying) == -1) {
+            continue;
         }
     }
     queen.CurrentPosition.y = baseQueen.CurrentPosition.y;
@@ -167,39 +166,70 @@ void queenAllowedMoves(pawn queen,bool colorPlaying,SDL_Window* window,SDL_Rende
     //Move Down
     for (int j = 1; queen.CurrentPosition.y < BOTTOM_SIDE; j++) {
         queen.CurrentPosition.y += move;
-        if (isValidMove(queen,colorPlaying)) {
+        if (isValidMove(queen,colorPlaying) == 1) {
             displayer.x = queen.CurrentPosition.x;
             displayer.y = queen.CurrentPosition.y;
             allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
             allowedMoves[i] = allowedMoveFiller;
             i++;
-            SDL_RenderFillRect(render,&displayer);
         }
+        if (isValidMove(queen,colorPlaying) == 2) {
+            displayer.x = queen.CurrentPosition.x;
+            displayer.y = queen.CurrentPosition.y;
+            allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
+            allowedMoves[i] = allowedMoveFiller;
+            i++;
+            break;
+        }
+        if (isValidMove(queen,colorPlaying) == -1) {
+            break;
+        }
+        
     }
     queen.CurrentPosition.y = baseQueen.CurrentPosition.y;
     //Move Right
     for (int j = 1; queen.CurrentPosition.x <= RIGHT_SIDE; j++) {
         queen.CurrentPosition.x += move;
-        if (isValidMove(queen,colorPlaying)) {
+        if (isValidMove(queen,colorPlaying) == 1) {
             displayer.x = queen.CurrentPosition.x;
             displayer.y = queen.CurrentPosition.y;
             allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
             allowedMoves[i] = allowedMoveFiller;
             i++;
-            SDL_RenderFillRect(render,&displayer);
+        }
+        if (isValidMove(queen,colorPlaying) == 2) {
+            displayer.x = queen.CurrentPosition.x;
+            displayer.y = queen.CurrentPosition.y;
+            allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
+            allowedMoves[i] = allowedMoveFiller;
+            i++;
+            break;
+        }
+        if (isValidMove(queen,colorPlaying) == -1) {
+            break;
         }
     }
     queen.CurrentPosition.x = baseQueen.CurrentPosition.x;
     //Move Left
     for (int j = 1; queen.CurrentPosition.x >= LEFT_SIDE; j++) {
         queen.CurrentPosition.x -= move;
-        if (isValidMove(queen,colorPlaying)) {
+        if (isValidMove(queen,colorPlaying) == 1) {
             displayer.x = queen.CurrentPosition.x;
             displayer.y = queen.CurrentPosition.y;
             allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
             allowedMoves[i] = allowedMoveFiller;
             i++;
-            SDL_RenderFillRect(render,&displayer);
+        }
+        if (isValidMove(queen,colorPlaying) == 2) {
+            displayer.x = queen.CurrentPosition.x;
+            displayer.y = queen.CurrentPosition.y;
+            allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
+            allowedMoves[i] = allowedMoveFiller;
+            i++;
+            break;
+        }
+        if (isValidMove(queen,colorPlaying) == -1) {
+            break;
         }
     }
     queen.CurrentPosition.x = baseQueen.CurrentPosition.x;
@@ -207,13 +237,23 @@ void queenAllowedMoves(pawn queen,bool colorPlaying,SDL_Window* window,SDL_Rende
     for (int j = 1; queen.CurrentPosition.x <= RIGHT_SIDE && queen.CurrentPosition.y >= TOP_SIDE; j++) {
         queen.CurrentPosition.x += move;
         queen.CurrentPosition.y -= move;
-        if (isValidMove(queen,colorPlaying)) {
+        if (isValidMove(queen,colorPlaying) == 1) {
             displayer.x = queen.CurrentPosition.x;
             displayer.y = queen.CurrentPosition.y;
             allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
             allowedMoves[i] = allowedMoveFiller;
             i++;
-            SDL_RenderFillRect(render,&displayer);
+        }
+        if (isValidMove(queen,colorPlaying) == 2) {
+            displayer.x = queen.CurrentPosition.x;
+            displayer.y = queen.CurrentPosition.y;
+            allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
+            allowedMoves[i] = allowedMoveFiller;
+            i++;
+            break;
+        }
+        if (isValidMove(queen,colorPlaying) == -1) {
+            break;
         }
     }
     queen.CurrentPosition.x = baseQueen.CurrentPosition.x;
@@ -222,13 +262,23 @@ void queenAllowedMoves(pawn queen,bool colorPlaying,SDL_Window* window,SDL_Rende
     for (int j = 1; queen.CurrentPosition.x >= LEFT_SIDE && queen.CurrentPosition.y >= TOP_SIDE; j++) {
         queen.CurrentPosition.x -= move;
         queen.CurrentPosition.y -= move;
-        if (isValidMove(queen,colorPlaying)) {
+        if (isValidMove(queen,colorPlaying) == 1) {
             displayer.x = queen.CurrentPosition.x;
             displayer.y = queen.CurrentPosition.y;
             allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
             allowedMoves[i] = allowedMoveFiller;
             i++;
-            SDL_RenderFillRect(render,&displayer);
+        }
+        if (isValidMove(queen,colorPlaying) == 2) {
+            displayer.x = queen.CurrentPosition.x;
+            displayer.y = queen.CurrentPosition.y;
+            allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
+            allowedMoves[i] = allowedMoveFiller;
+            i++;
+            break;
+        }
+        if (isValidMove(queen,colorPlaying) == -1) {
+            break;
         }
     }
     queen.CurrentPosition.x = baseQueen.CurrentPosition.x;
@@ -237,13 +287,23 @@ void queenAllowedMoves(pawn queen,bool colorPlaying,SDL_Window* window,SDL_Rende
     for (int j = 1; queen.CurrentPosition.x >= LEFT_SIDE && queen.CurrentPosition.y < BOTTOM_SIDE; j++) {
         queen.CurrentPosition.x -= move;
         queen.CurrentPosition.y += move;
-        if (isValidMove(queen,colorPlaying)) {
+        if (isValidMove(queen,colorPlaying) == 1) {
             displayer.x = queen.CurrentPosition.x;
             displayer.y = queen.CurrentPosition.y;
             allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
             allowedMoves[i] = allowedMoveFiller;
             i++;
-            SDL_RenderFillRect(render,&displayer);
+        }
+        if (isValidMove(queen,colorPlaying) == 2) {
+            displayer.x = queen.CurrentPosition.x;
+            displayer.y = queen.CurrentPosition.y;
+            allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
+            allowedMoves[i] = allowedMoveFiller;
+            i++;
+            break;
+        }
+        if (isValidMove(queen,colorPlaying) == -1) {
+            break;
         }
     }
     queen.CurrentPosition.x = baseQueen.CurrentPosition.x;
@@ -252,20 +312,48 @@ void queenAllowedMoves(pawn queen,bool colorPlaying,SDL_Window* window,SDL_Rende
     for (int j = 1; queen.CurrentPosition.x <= RIGHT_SIDE && queen.CurrentPosition.y < BOTTOM_SIDE; j++) {
         queen.CurrentPosition.x += move;
         queen.CurrentPosition.y += move;
-        if (isValidMove(queen,colorPlaying)) {
+        if (isValidMove(queen,colorPlaying) == 1) {
             displayer.x = queen.CurrentPosition.x;
             displayer.y = queen.CurrentPosition.y;
             allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
             allowedMoves[i] = allowedMoveFiller;
             i++;
-            SDL_RenderFillRect(render,&displayer);
+        }
+        if (isValidMove(queen,colorPlaying) == 2) {
+            displayer.x = queen.CurrentPosition.x;
+            displayer.y = queen.CurrentPosition.y;
+            allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
+            allowedMoves[i] = allowedMoveFiller;
+            i++;
+            break;
+        }
+        if (isValidMove(queen,colorPlaying) == -1) {
+            break;
         }
     }
-    queen.CurrentPosition.x = baseQueen.CurrentPosition.x;
-    queen.CurrentPosition.y = baseQueen.CurrentPosition.y;
+    
+}
+
+void displayMovesAvailable(SDL_Window * window,SDL_Renderer * render) {
+    SDL_RenderClear(render);
+    createChessboard(window,render);
+    for (int i = 0; i < sizeof(pawnArray)/2; i++) {
+        createPawn(window,render,pawnArray[i]);
+    }
+    SDL_Rect displayer;
+    SDL_SetRenderDrawColor(render, 150, 0, 0, 0);
+    for (int i = 0; i < 28; i++) {
+        displayer.h = 89;
+        displayer.w = 89;
+        displayer.x = allowedMoves[i].x;
+        displayer.y = allowedMoves[i].y;
+        SDL_RenderFillRect(render,&displayer);
+    }
 
     SDL_RenderPresent(render);
+    
 }
+
 
 void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,SDL_Renderer* render) {
     int pawnType;
@@ -276,6 +364,7 @@ void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,S
         break;
     case 2:
         knightAllowedMoves(selectedPawn,colorPlaying,window,render);
+        displayMovesAvailable(window,render);
         break;
     case 3:
         //bishopAllowedMoves(selectedPawn,window,render);
@@ -285,6 +374,7 @@ void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,S
         break;
     case 5 :
         queenAllowedMoves(selectedPawn,colorPlaying,window,render);
+        displayMovesAvailable(window,render);
         break;
     case 6:
         //kingAllowedMoves(selectedPawn,window,render);
@@ -294,6 +384,7 @@ void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,S
         break;
     case 8:
         knightAllowedMoves(selectedPawn,colorPlaying,window,render);
+        displayMovesAvailable(window,render);
         break;
     case 9:
         //bishopAllowedMoves(selectedPawn,window,render);
@@ -303,6 +394,7 @@ void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,S
         break;
     case 11:
         queenAllowedMoves(selectedPawn,colorPlaying,window,render);
+        displayMovesAvailable(window,render);
         break;
     case 12:
         //kingAllowedMoves(selectedPawn,window,render);
@@ -332,7 +424,7 @@ int isAllowedMove(chessboardSquare chosenMove) {
 }
 
 void emptyAllowedMoves() {
-    for (int i = 0; i < 27; i++) {
+    for (int i = 0; i < 28; i++) {
         allowedMoves[i].x = -1;
         allowedMoves[i].y = -1;
     }
