@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
     bool colorPlaying = false;
     
     int chosenPawn;
+    int targetPawn;
 
     pawnArray = malloc(sizeof(pawn)*4);
     pawn LWknight;
@@ -65,7 +66,11 @@ int main(int argc, char** argv) {
                             chessboardSquare chosenMove = selectedSquare(event.button.x,event.button.y);
                             printf("%d / %d\n",chosenMove.x,chosenMove.y);
                             if (isAllowedMove(chosenMove)==1) {
-                                printf("Pif\n");
+                                if (selectedPawn(chosenMove,colorPlaying) == -2) {
+                                    targetPawn = selectedPawn(chosenMove,!colorPlaying);
+                                    eatPawn(targetPawn);
+                                }
+                                
                                 movePawn(pawnArray[chosenPawn],chosenMove,window,render);
                                 colorPlaying = !colorPlaying;
                             }

@@ -429,3 +429,10 @@ void emptyAllowedMoves() {
         allowedMoves[i].y = -1;
     }
 }
+
+void eatPawn(int target) {
+    pawnArray[target]->alive = false;
+    pawnArray[target]->CurrentPosition.x = 0;
+    pawnArray[target]->CurrentPosition.y = 0;
+}
+

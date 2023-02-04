@@ -12,6 +12,7 @@ struct pawn {
     SDL_Texture* pawn;
     char* type;
     int teamColor;
+    bool alive;
 };
 
 pawn ** pawnArray;
@@ -126,6 +127,7 @@ void pawnFiller(pawn* pawn,char* pawnType,int color,int x,int y,SDL_Window *wind
     pawn->CurrentPosition.y = y;
     pawn->teamColor = color;
     pawn->type = pawnType;
+    pawn->alive = true;
     pawn->pawn = createPawn(window,render,pawn);
 }
 
@@ -226,6 +228,9 @@ void displayAll(SDL_Window* window,SDL_Renderer* render) {
     SDL_RenderClear(render);
     createChessboard(window,render);
     for (int i = 0; i < sizeof(pawnArray)/2; i++) {
+        if (pawnArray[i]->alive == false) {
+            continue;
+        } 
         createPawn(window,render,pawnArray[i]);
     }
     SDL_RenderPresent(render);
