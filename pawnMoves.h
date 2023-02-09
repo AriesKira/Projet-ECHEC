@@ -6,6 +6,7 @@
 #define BOTTOM_SIDE 809
 #define CELL_SIZE 90
 #define NB_CELL_PER_SIDE 8
+#define sizeOfPawnArray 5
 
 typedef struct chessboardSquare chessboardSquare;
 struct chessboardSquare {
@@ -53,7 +54,7 @@ chessboardSquare selectedSquare(int selectedX,int selectedY){
 }
 
 int selectedPawn(chessboardSquare selectedSquare,bool colorPlaying) {
-    for (int i = 0; i < sizeof(pawnArray)/2; i++) {
+    for (int i = 0; i < sizeOfPawnArray; i++) {
         if (pawnArray[i]->CurrentPosition.x == selectedSquare.x && pawnArray[i]->CurrentPosition.y == selectedSquare.y) {
             if (pawnArray[i]->teamColor != colorPlaying) {
                 return-2;
@@ -337,7 +338,7 @@ void queenAllowedMoves(pawn queen,bool colorPlaying,SDL_Window* window,SDL_Rende
 void displayMovesAvailable(SDL_Window * window,SDL_Renderer * render) {
     SDL_RenderClear(render);
     createChessboard(window,render);
-    for (int i = 0; i < sizeof(pawnArray)/2; i++) {
+    for (int i = 0; i < sizeOfPawnArray; i++) {
         createPawn(window,render,pawnArray[i]);
     }
     SDL_Rect displayer;
@@ -360,7 +361,8 @@ void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,S
     funcNumb(selectedPawn.type,selectedPawn.teamColor, &pawnType);
     switch (pawnType) {
     case 1:
-        //pawnAllowedMoves(selectedPawn,window,render);
+        //pawnAllowedMoves(selectedPawn,colorPlaying,window,render);
+        //displayMovesAvailable(window,render);
         break;
     case 2:
         knightAllowedMoves(selectedPawn,colorPlaying,window,render);
@@ -370,6 +372,7 @@ void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,S
         //bishopAllowedMoves(selectedPawn,window,render);
         break;
     case 4:
+        printf("pouf\n");
         //rookAllowedMoves(selectedPawn,window,render);
         break;
     case 5 :
@@ -391,6 +394,7 @@ void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,S
         break;
     case 10:
         //rookAllowedMoves(selectedPawn,window,render);
+        printf("pouf\n");
         break;
     case 11:
         queenAllowedMoves(selectedPawn,colorPlaying,window,render);

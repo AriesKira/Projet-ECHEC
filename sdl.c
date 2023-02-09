@@ -15,12 +15,15 @@ int main(int argc, char** argv) {
     int chosenPawn;
     int targetPawn;
 
-    pawnArray = malloc(sizeof(pawn)*4);
+    pawnArray = malloc(sizeof(pawn)*5);
     pawn LWknight;
     pawn RWknight;
     pawn Wqueen;
     pawn Bqueen;
+    pawn Wrook;
     
+
+
     if(SDL_Init(SDL_INIT_VIDEO) !=0 ) {
         SDL_ExitWithError("Erreur initialisation SDL\n");
         return 0;
@@ -44,11 +47,13 @@ int main(int argc, char** argv) {
     pawnFiller(&RWknight,"knight",0,780,720,window,render);
     pawnFiller(&Wqueen,"queen",0,510,720,window,render);
     pawnFiller(&Bqueen,"queen",1,510,90,window,render);
+    pawnFiller(&Wrook,"rook",0,240,720,window,render);
 
     pawnArray[0] = &LWknight;
     pawnArray[1] = &RWknight;
     pawnArray[2] = &Wqueen;
     pawnArray[3] = &Bqueen;
+    pawnArray[4] = &Wrook;
     generateChessboardSquareArray();
 
     SDL_RenderPresent(render);

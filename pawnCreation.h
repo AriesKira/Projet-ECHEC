@@ -227,7 +227,7 @@ void displayAll(SDL_Window* window,SDL_Renderer* render) {
 
     SDL_RenderClear(render);
     createChessboard(window,render);
-    for (int i = 0; i < sizeof(pawnArray)/2; i++) {
+    for (int i = 0; i < 5; i++) {
         if (pawnArray[i]->alive == false) {
             continue;
         } 
