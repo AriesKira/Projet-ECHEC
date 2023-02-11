@@ -444,7 +444,6 @@ void rookAllowedMoves(pawn rook,bool colorPlaying,SDL_Window* window,SDL_Rendere
         int y;
     }displayer;
    
-    SDL_SetRenderDrawColor(render, 150, 0, 0, 0);
     //Move UP
     for (int j = 1; rook.CurrentPosition.y >= TOP_SIDE; j++) {
         rook.CurrentPosition.y -= move;
@@ -687,9 +686,9 @@ void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,S
         break;
     case 3:
         bishopAllowedMoves(selectedPawn,colorPlaying,window,render);
+        displayMovesAvailable(window,render);
         break;
     case 4:
-        printf("pouf\n");
         rookAllowedMoves(selectedPawn,colorPlaying,window,render);
         displayMovesAvailable(window,render);
         break;
@@ -709,12 +708,12 @@ void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,S
         displayMovesAvailable(window,render);
         break;
     case 9:
-        //bishopAllowedMoves(selectedPawn,window,render);
+        bishopAllowedMoves(selectedPawn,colorPlaying,window,render);
+        displayMovesAvailable(window,render);
         break;
     case 10:
         rookAllowedMoves(selectedPawn,colorPlaying,window,render);
         displayMovesAvailable(window,render);
-        printf("pouf\n");
         break;
     case 11:
         queenAllowedMoves(selectedPawn,colorPlaying,window,render);
