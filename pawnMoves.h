@@ -356,7 +356,7 @@ void pawnAllowedMoves(pawn pawnSelected,bool colorPlaying,SDL_Window* window,SDL
         pawnSelected.CurrentPosition.y = basePawn.CurrentPosition.y;
 
     }else if (pawnSelected.CurrentPosition.x == basePawn.basePosition.x && pawnSelected.CurrentPosition.y == basePawn.basePosition.y && pawnSelected.teamColor == 1) {
-        for (int j = 1; pawnSelected.CurrentPosition.y < pawnSelected.CurrentPosition.y + (move*2); i++) {
+        for (int j = 1; pawnSelected.CurrentPosition.y < basePawn.basePosition.y + (move*2); i++) {
             pawnSelected.CurrentPosition.y += move;
             if (isValidMove(pawnSelected,colorPlaying) == 1) {
                 displayer.x = pawnSelected.CurrentPosition.x;
