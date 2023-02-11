@@ -20,8 +20,9 @@ int main(int argc, char** argv) {
     pawn RWknight;
     pawn Wqueen;
     pawn Bqueen;
-    pawn Wrook;
-    
+    //pawn Wrook;
+    pawn Wpawn1;
+    pawn Bpawn1;
 
 
     if(SDL_Init(SDL_INIT_VIDEO) !=0 ) {
@@ -47,13 +48,17 @@ int main(int argc, char** argv) {
     pawnFiller(&RWknight,"knight",0,780,720,window,render);
     pawnFiller(&Wqueen,"queen",0,510,720,window,render);
     pawnFiller(&Bqueen,"queen",1,510,90,window,render);
-    pawnFiller(&Wrook,"rook",0,240,720,window,render);
+    //pawnFiller(&Wrook,"rook",0,240,720,window,render);
+    pawnFiller(&Wpawn1,"pawn",0,240,630,window,render);
+    pawnFiller(&Bpawn1,"pawn",1,240,180,window,render);
 
     pawnArray[0] = &LWknight;
     pawnArray[1] = &RWknight;
     pawnArray[2] = &Wqueen;
     pawnArray[3] = &Bqueen;
-    pawnArray[4] = &Wrook;
+    //pawnArray[4] = &Wrook;
+    pawnArray[4] = &Wpawn1;
+    pawnArray[5] = &Bpawn1;
     generateChessboardSquareArray();
 
     SDL_RenderPresent(render);
@@ -92,7 +97,7 @@ int main(int argc, char** argv) {
                             if (chosenPawn == -1 || chosenPawn == -2) {
                                 continue;
                             }else{
-                                pawn tmpPawn = {.CurrentPosition.x = pawnArray[chosenPawn]->CurrentPosition.x,.CurrentPosition.y = pawnArray[chosenPawn]->CurrentPosition.y,.teamColor = pawnArray[chosenPawn]->teamColor,.type = pawnArray[chosenPawn]->type};
+                                pawn tmpPawn = {.CurrentPosition.x = pawnArray[chosenPawn]->CurrentPosition.x,.CurrentPosition.y = pawnArray[chosenPawn]->CurrentPosition.y,.teamColor = pawnArray[chosenPawn]->teamColor,.type = pawnArray[chosenPawn]->type,.basePosition.x = pawnArray[chosenPawn]->basePosition.x,.basePosition.y = pawnArray[chosenPawn]->basePosition.y};
                                 printf("%s\n",pawnArray[chosenPawn]->type);
                                 diplayAllowedMoves(tmpPawn,colorPlaying,window,render);
                                 pawnWasSelected = true;

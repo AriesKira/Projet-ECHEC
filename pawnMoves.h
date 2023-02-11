@@ -355,7 +355,7 @@ void pawnAllowedMoves(pawn pawnSelected,bool colorPlaying,SDL_Window* window,SDL
         }
         pawnSelected.CurrentPosition.y = basePawn.CurrentPosition.y;
 
-    }else if (pawnSelected.CurrentPosition.x == basePawn.basePosition.x && pawnSelected.CurrentPosition.y == basePawn.CurrentPosition.y && pawnSelected.teamColor == 1) {
+    }else if (pawnSelected.CurrentPosition.x == basePawn.basePosition.x && pawnSelected.CurrentPosition.y == basePawn.basePosition.y && pawnSelected.teamColor == 1) {
         for (int j = 1; pawnSelected.CurrentPosition.y < pawnSelected.CurrentPosition.y + (move*2); i++) {
             pawnSelected.CurrentPosition.y += move;
             if (isValidMove(pawnSelected,colorPlaying) == 1) {
@@ -404,7 +404,7 @@ void pawnAllowedMoves(pawn pawnSelected,bool colorPlaying,SDL_Window* window,SDL
             pawnSelected.CurrentPosition.x = basePawn.CurrentPosition.x;
         }else {
             //Move UP
-            pawnSelected.CurrentPosition.y = pawnSelected.CurrentPosition.y + move;
+            pawnSelected.CurrentPosition.y +=  move;
             if (isValidMove(pawnSelected,colorPlaying) == 1) {
                 displayer.x = pawnSelected.CurrentPosition.x;
                 displayer.y = pawnSelected.CurrentPosition.y;
@@ -539,7 +539,7 @@ void rookAllowedMoves(pawn rook,bool colorPlaying,SDL_Window* window,SDL_Rendere
         }
     }
     rook.CurrentPosition.x = baseRook.CurrentPosition.x;
-    //MOVE UP - RIGHT
+    //MOVE UP 
     for (int j = 1; rook.CurrentPosition.x <= RIGHT_SIDE && rook.CurrentPosition.y >= TOP_SIDE; j++) {
         rook.CurrentPosition.x += move;
         rook.CurrentPosition.y -= move;
@@ -708,12 +708,12 @@ void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,S
         displayMovesAvailable(window,render);
         break;
     case 3:
-        //bishopAllowedMoves(selectedPawn,window,render);
+        bishopAllowedMoves(selectedPawn,colorPlaying,window,render);
         break;
     case 4:
         printf("pouf\n");
-        //rookAllowedMoves(selectedPawn,colorPlaying,window,render);
-        //displayMovesAvailable(window,render);
+        rookAllowedMoves(selectedPawn,colorPlaying,window,render);
+        displayMovesAvailable(window,render);
         break;
     case 5 :
         queenAllowedMoves(selectedPawn,colorPlaying,window,render);
@@ -734,7 +734,8 @@ void diplayAllowedMoves(pawn selectedPawn,bool colorPlaying,SDL_Window* window,S
         //bishopAllowedMoves(selectedPawn,window,render);
         break;
     case 10:
-        //rookAllowedMoves(selectedPawn,window,render);
+        rookAllowedMoves(selectedPawn,colorPlaying,window,render);
+        displayMovesAvailable(window,render);
         printf("pouf\n");
         break;
     case 11:
