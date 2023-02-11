@@ -4,6 +4,14 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define LEFT_SIDE 239
+#define RIGHT_SIDE 959
+#define TOP_SIDE 89
+#define BOTTOM_SIDE 809
+#define CELL_SIZE 90
+#define NB_CELL_PER_SIDE 8
+#define sizeOfPawnArray 7
+
 
 typedef struct pawn pawn;
 struct pawn {
@@ -227,7 +235,7 @@ void displayAll(SDL_Window* window,SDL_Renderer* render) {
 
     SDL_RenderClear(render);
     createChessboard(window,render);
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < sizeOfPawnArray; i++) {
         if (pawnArray[i]->alive == false) {
             continue;
         } 
