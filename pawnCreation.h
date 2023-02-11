@@ -10,7 +10,7 @@
 #define BOTTOM_SIDE 809
 #define CELL_SIZE 90
 #define NB_CELL_PER_SIDE 8
-#define sizeOfPawnArray 6
+#define sizeOfPawnArray 7
 
 
 typedef struct pawn pawn;

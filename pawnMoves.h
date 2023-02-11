@@ -464,7 +464,7 @@ void rookAllowedMoves(pawn rook,bool colorPlaying,SDL_Window* window,SDL_Rendere
             break;
         }
         if (isValidMove(rook,colorPlaying) == -1) {
-            continue;
+            break;
         }
     }
     rook.CurrentPosition.y = baseRook.CurrentPosition.y;
@@ -539,29 +539,7 @@ void rookAllowedMoves(pawn rook,bool colorPlaying,SDL_Window* window,SDL_Rendere
         }
     }
     rook.CurrentPosition.x = baseRook.CurrentPosition.x;
-    //MOVE UP 
-    for (int j = 1; rook.CurrentPosition.x <= RIGHT_SIDE && rook.CurrentPosition.y >= TOP_SIDE; j++) {
-        rook.CurrentPosition.x += move;
-        rook.CurrentPosition.y -= move;
-        if (isValidMove(rook,colorPlaying) == 1) {
-            displayer.x = rook.CurrentPosition.x;
-            displayer.y = rook.CurrentPosition.y;
-            allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
-            allowedMoves[i] = allowedMoveFiller;
-            i++;
-        }
-        if (isValidMove(rook,colorPlaying) == 2) {
-            displayer.x = rook.CurrentPosition.x;
-            displayer.y = rook.CurrentPosition.y;
-            allowedMoveFiller = selectedSquare(displayer.x,displayer.y+1);
-            allowedMoves[i] = allowedMoveFiller;
-            i++;
-            break;
-        }
-        if (isValidMove(rook,colorPlaying) == -1) {
-            break;
-        }
-    }
+   
 }
 
 void bishopAllowedMoves(pawn bishop,bool colorPlaying,SDL_Window* window,SDL_Renderer* render){

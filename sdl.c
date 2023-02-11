@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     pawn RWknight;
     pawn Wqueen;
     pawn Bqueen;
-    //pawn Wrook;
+    pawn Wrook;
     pawn Wpawn1;
     pawn Bpawn1;
 
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     pawnFiller(&RWknight,"knight",0,780,720,window,render);
     pawnFiller(&Wqueen,"queen",0,510,720,window,render);
     pawnFiller(&Bqueen,"queen",1,510,90,window,render);
-    //pawnFiller(&Wrook,"rook",0,240,720,window,render);
+    pawnFiller(&Wrook,"rook",0,240,720,window,render);
     pawnFiller(&Wpawn1,"pawn",0,240,630,window,render);
     pawnFiller(&Bpawn1,"pawn",1,240,180,window,render);
 
@@ -56,9 +56,9 @@ int main(int argc, char** argv) {
     pawnArray[1] = &RWknight;
     pawnArray[2] = &Wqueen;
     pawnArray[3] = &Bqueen;
-    //pawnArray[4] = &Wrook;
-    pawnArray[4] = &Wpawn1;
-    pawnArray[5] = &Bpawn1;
+    pawnArray[4] = &Wrook;
+    pawnArray[5] = &Wpawn1;
+    pawnArray[6] = &Bpawn1;
     generateChessboardSquareArray();
 
     SDL_RenderPresent(render);
