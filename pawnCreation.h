@@ -10,8 +10,8 @@
 #define BOTTOM_SIDE 809
 #define CELL_SIZE 90
 #define NB_CELL_PER_SIDE 8
-#define sizeOfPawnArray 9
-
+#define sizeOfPawnArray 11
+#define MAX_PAWN_MOVES 27
 
 typedef struct pawn pawn;
 struct pawn {
@@ -228,6 +228,13 @@ char* pawnNameAndColor(pawn* pawn) {
         printf("Pion introuvable\n");
         return 0;
         break;
+    }
+}
+
+void copyBoard(pawn* boardToCopyTo) {
+    for (int pawnIndex = 0; pawnIndex < sizeOfPawnArray ; ++pawnIndex) {
+        pawn p = {.CurrentPosition.x = pawnArray[pawnIndex]->CurrentPosition.x,.CurrentPosition.y = pawnArray[pawnIndex]->CurrentPosition.y,.teamColor = pawnArray[pawnIndex]->teamColor,.type = pawnArray[pawnIndex]->type,.basePosition.x = pawnArray[pawnIndex]->basePosition.x,.basePosition.y = pawnArray[pawnIndex]->basePosition.y,.alive = pawnArray[pawnIndex]->alive};
+        boardToCopyTo[pawnIndex] = p;
     }
 }
 
