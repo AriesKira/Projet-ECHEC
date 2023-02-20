@@ -24,9 +24,7 @@ struct pawn {
 };
 
 pawn ** pawnArray;
-pawn ERROR = {.type = "ERROR"};
 
-SDL_Texture* createFuncToUse(pawn* pawn,SDL_Window *window,SDL_Renderer *render);
 void funcNumb (char* pawnType,int pawnColor,int* value);
 void SDL_ExitWithError(const char* msg);
 SDL_Texture* createChessboard(SDL_Window *window,SDL_Renderer *render);
@@ -82,6 +80,48 @@ SDL_Texture* createChessboard(SDL_Window *window,SDL_Renderer *render) {
 
     return texture;
 }
+SDL_Texture* createLegend(SDL_Window *window,SDL_Renderer *render) {
+    SDL_Surface* image = NULL;
+    SDL_Texture* texture = NULL;
+    image = SDL_LoadBMP("./images/legend.bmp");
+
+    if (image == NULL) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur Image");
+        return 0;
+    }
+    texture = SDL_CreateTextureFromSurface(render,image);
+
+    if (texture == NULL) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur Texture\n");
+        return 0;
+    }
+
+    SDL_FreeSurface(image);
+    SDL_Rect rectangle;
+
+    if(SDL_QueryTexture(texture,NULL,NULL,&rectangle.w,&rectangle.h)!=0) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur chargement de la texture\n");
+        return 0;
+    }
+
+    rectangle.x = 1000;
+    rectangle.y = 200;
+
+    if(SDL_RenderCopy(render,texture,NULL,&rectangle)!=0) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur affichage de la texture\n");
+        return 0;
+    }
+
+    return texture;
+}
 
 SDL_Texture* createPawn(SDL_Window *window,SDL_Renderer *render,pawn* pawn) {
     SDL_Surface* image = NULL;
@@ -126,7 +166,100 @@ SDL_Texture* createPawn(SDL_Window *window,SDL_Renderer *render,pawn* pawn) {
 
     return texture;
 }
+SDL_Texture* createWinner(bool colorWinning,SDL_Window *window,SDL_Renderer *render) {
+    SDL_Surface* image = NULL;
+    SDL_Texture* texture = NULL;
+    if (!colorWinning) {
+        image = SDL_LoadBMP("./images/whiteWinner.bmp");
+    } else {
+        image = SDL_LoadBMP("./images/blackWinner.bmp");
+    }
 
+
+    if (image == NULL) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur Image");
+        return 0;
+    }
+    texture = SDL_CreateTextureFromSurface(render,image);
+
+    if (texture == NULL) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur Texture\n");
+        return 0;
+    }
+
+    SDL_FreeSurface(image);
+    SDL_Rect rectangle;
+
+    if(SDL_QueryTexture(texture,NULL,NULL,&rectangle.w,&rectangle.h)!=0) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur chargement de la texture\n");
+        return 0;
+    }
+
+    rectangle.x = 400;
+    rectangle.y = 400;
+
+    if(SDL_RenderCopy(render,texture,NULL,&rectangle)!=0) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur affichage de la texture\n");
+        return 0;
+    }
+
+    return texture;
+}
+SDL_Texture* createCheck(bool colorInCheck,SDL_Window *window,SDL_Renderer *render) {
+    SDL_Surface* image = NULL;
+    SDL_Texture* texture = NULL;
+    if (!colorInCheck) {
+        image = SDL_LoadBMP("./images/whiteCheck.bmp");
+    } else {
+        image = SDL_LoadBMP("./images/blackCheck.bmp");
+    }
+
+
+    if (image == NULL) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur Image");
+        return 0;
+    }
+    texture = SDL_CreateTextureFromSurface(render,image);
+
+    if (texture == NULL) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur Texture\n");
+        return 0;
+    }
+
+    SDL_FreeSurface(image);
+    SDL_Rect rectangle;
+
+    if(SDL_QueryTexture(texture,NULL,NULL,&rectangle.w,&rectangle.h)!=0) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur chargement de la texture\n");
+        return 0;
+    }
+
+    rectangle.x = 445;
+    rectangle.y = 0;
+
+    if(SDL_RenderCopy(render,texture,NULL,&rectangle)!=0) {
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        SDL_ExitWithError("Erreur affichage de la texture\n");
+        return 0;
+    }
+
+    return texture;
+}
 //------------------PAWN CREATION--------------------------------------------//
 void pawnFiller(pawn* pawn,char* pawnType,int color,int x,int y,SDL_Window *window,SDL_Renderer *render){
     pawn->basePosition.x = x;
@@ -238,15 +371,44 @@ void copyBoard(pawn* boardToCopyTo) {
     }
 }
 
-void displayAll(SDL_Window* window,SDL_Renderer* render) {
+void displayAll(bool colorPlaying,bool isInCheck,SDL_Window* window,SDL_Renderer* render) {
 
     SDL_RenderClear(render);
     createChessboard(window,render);
+    createLegend(window,render);
     for (int i = 0; i < sizeOfPawnArray; i++) {
         if (pawnArray[i]->alive == false) {
             continue;
         } 
         createPawn(window,render,pawnArray[i]);
+    }
+    if (isInCheck) {
+        SDL_Texture * check = createCheck(!colorPlaying,window,render);
+        if (check == NULL) {
+            SDL_ExitWithError("Erreur création de l'echec\n");
+            SDL_DestroyRenderer(render);
+            SDL_DestroyWindow(window);
+        }
+    }
+    SDL_RenderPresent(render);
+}
+
+void displayWinner(bool colorPlaying,SDL_Window* window,SDL_Renderer* render) {
+    SDL_Texture * winner = NULL;
+    SDL_RenderClear(render);
+    createChessboard(window,render);
+    createLegend(window,render);
+    for (int i = 0; i < sizeOfPawnArray; i++) {
+        if (pawnArray[i]->alive == false) {
+            continue;
+        }
+        createPawn(window,render,pawnArray[i]);
+    }
+    winner = createWinner(colorPlaying,window,render);
+    if (winner == NULL) {
+        SDL_ExitWithError("Erreur création de la légende\n");
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
     }
     SDL_RenderPresent(render);
 }

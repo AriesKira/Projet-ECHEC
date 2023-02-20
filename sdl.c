@@ -1,14 +1,16 @@
 #include "checkMate.h"
 
 #define Window_HEIGHT 900
-#define Window_WIDTH 1300
+#define Window_WIDTH 1400
 
 
 
 int main(int argc, char** argv) {
     SDL_Window *window =NULL;
     SDL_Renderer *render = NULL;
-    SDL_Texture* chessboard = NULL;
+    SDL_Texture *chessBoard= NULL;
+    SDL_Texture *legend = NULL;
+    SDL_Texture * check = NULL;
     bool pawnWasSelected = false;
     bool colorPlaying = false;
     int checkMate = 0;
@@ -62,9 +64,16 @@ int main(int argc, char** argv) {
     }
     
     
-    chessboard = createChessboard(window,render);
-    if (chessboard == NULL) {
+    chessBoard = createChessboard(window,render);
+    if (chessBoard == NULL) {
         SDL_ExitWithError("Erreur création echéquier\n");
+        SDL_DestroyRenderer(render);
+        SDL_DestroyWindow(window);
+        return 0;
+    }
+    legend = createLegend(window,render);
+    if (legend == NULL) {
+        SDL_ExitWithError("Erreur création de la légende\n");
         SDL_DestroyRenderer(render);
         SDL_DestroyWindow(window);
         return 0;
@@ -167,15 +176,14 @@ int main(int argc, char** argv) {
                                     movePawn(&boardCopy[chosenPawn], chosenMove, window, render);
                                     emptyAllowedMoves();
                                     if ((checkMate = isCheck(boardCopy,colorPlaying,false,window,render))== 2) {
+                                        displayWinner(colorPlaying,window,render);
+                                        SDL_Delay(5000);
                                         programLaunched = SDL_FALSE;
-                                        printf("Mate\n");
-                                    }
-                                    if (checkMate == 1) {
-                                        printf("Plouf\n");
+                                        break;
                                     }
                                     colorPlaying = !colorPlaying;
                                 }
-                                displayAll(window,render);
+                                displayAll(colorPlaying,checkMate,window,render);
                                 emptyAllowedMoves();
                                 
                                 pawnWasSelected = false;
@@ -190,7 +198,7 @@ int main(int argc, char** argv) {
                                 }else{
                                     pawn tmpPawn = copyPawn(boardCopy, chosenPawn);
                                     printf("%s\n",pawnArray[chosenPawn]->type);
-                                    diplayAllowedMoves(tmpPawn,colorPlaying,window,render);
+                                    diplayAllowedMoves(tmpPawn,colorPlaying,checkMate,window,render);
                                     pawnWasSelected = true;
                                 }
                                 continue;
@@ -229,7 +237,7 @@ int main(int argc, char** argv) {
     
     
 
-    SDL_DestroyTexture(chessboard);
+    SDL_DestroyTexture(chessBoard);
     SDL_DestroyRenderer(render);
     SDL_DestroyRenderer(render);
     SDL_DestroyWindow(window);

@@ -940,9 +940,10 @@ void kingAllowedMoves(pawn *board, pawn king, bool colorPlaying, chessboardSquar
     kingsMoves(board, king, colorPlaying, checkValidation, allowedMoves, window, render);
 }
 
-void displayMovesAvailable(SDL_Window *window, SDL_Renderer *render) {
+void displayMovesAvailable(bool colorPlaying,bool isInCheck,SDL_Window *window, SDL_Renderer *render) {
     SDL_RenderClear(render);
     createChessboard(window, render);
+    createLegend(window,render);
     for (int i = 0; i < sizeOfPawnArray; i++) {
         createPawn(window, render, pawnArray[i]);
     }
@@ -954,6 +955,9 @@ void displayMovesAvailable(SDL_Window *window, SDL_Renderer *render) {
         displayer.x = allowedMoves[i].x;
         displayer.y = allowedMoves[i].y;
         SDL_RenderFillRect(render, &displayer);
+    }
+    if (isInCheck) {
+        createCheck(!colorPlaying,window,render);
     }
 
     SDL_RenderPresent(render);
@@ -974,7 +978,7 @@ void emptyAllowedMoves() {
     }
 }
 
-void diplayAllowedMoves(pawn selectedPawn, bool colorPlaying, SDL_Window *window, SDL_Renderer *render) {
+void diplayAllowedMoves(pawn selectedPawn, bool colorPlaying,bool isInCheck, SDL_Window *window, SDL_Renderer *render) {
     int pawnType;
     funcNumb(selectedPawn.type, selectedPawn.teamColor, &pawnType);
     pawn board[sizeOfPawnArray];
@@ -1015,7 +1019,7 @@ void diplayAllowedMoves(pawn selectedPawn, bool colorPlaying, SDL_Window *window
     for (int move = 0; move < MAX_PAWN_MOVES; ++move) {
         allowedMoves[move] = moves[move];
     }
-    displayMovesAvailable(window, render);
+    displayMovesAvailable(colorPlaying,isInCheck,window, render);
 }
 
 void movePawn(pawn *pawn, chessboardSquare chosenMove, SDL_Window *window, SDL_Renderer *render) {
