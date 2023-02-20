@@ -216,7 +216,7 @@ SDL_Texture* createWinner(bool colorWinning,SDL_Window *window,SDL_Renderer *ren
 SDL_Texture* createCheck(bool colorInCheck,SDL_Window *window,SDL_Renderer *render) {
     SDL_Surface* image = NULL;
     SDL_Texture* texture = NULL;
-    if (!colorInCheck) {
+    if (colorInCheck) {
         image = SDL_LoadBMP("./images/whiteCheck.bmp");
     } else {
         image = SDL_LoadBMP("./images/blackCheck.bmp");
