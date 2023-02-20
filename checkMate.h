@@ -123,7 +123,6 @@ bool isMate(int checkPawn, int kingTarget, chessboardSquare position, SDL_Window
 int isCheck(pawn chessboard[MAX_PAWN_MOVES], bool colorPlaying,bool isValidation,SDL_Window* window,SDL_Renderer* render) {
     chessboardSquare arrayToFill[MAX_PAWN_MOVES];
     cleanMoveArray(arrayToFill);
-    printBoard(chessboard);
     for (int i = 0; i < sizeOfPawnArray; i++) {
         if (chessboard[i].alive == true && chessboard[i].teamColor == colorPlaying) {
             pawn tmpPawn = chessboard[i];

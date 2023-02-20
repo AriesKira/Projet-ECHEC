@@ -13,8 +13,6 @@ void printBoard(pawn *board);
 //-----------------BOARD MANAGEMENT---------------//
 
 chessboardSquare allowedMoves[27];
-chessboardSquare nextMove[100];
-chessboardSquare CheckMate[9];
 chessboardSquare chessboard[NB_CELL_PER_SIDE][NB_CELL_PER_SIDE];
 
 void generateChessboardSquareArray() {
@@ -52,6 +50,8 @@ chessboardSquare selectedSquare(int selectedX, int selectedY) {
             }
         }
     }
+    chessboardSquare ERROR = {.x = 0, .y = 0};
+    return  ERROR;
 }
 
 int selectedPawn(pawn *board, chessboardSquare selectedSquare, bool colorPlaying) {
@@ -192,7 +192,7 @@ void queenAllowedMoves(pawn *board, pawn queen, bool colorPlaying, chessboardSqu
             break;
         }
         if (isValidMove(board, queen, colorPlaying, false, window, render) == -1) {
-            continue;
+            break;
         }
     }
     queen.CurrentPosition.y = baseQueen.CurrentPosition.y;
@@ -1036,12 +1036,6 @@ int isAllowedMove(chessboardSquare chosenMove) {
     return 0;
 }
 
-void emptyCheckMate() {
-    for (int i = 0; i < 9; i++) {
-        CheckMate[i].x = -1;
-        CheckMate[i].y = -1;
-    }
-}
 
 void eatPawn(int target) {
     pawnArray[target]->alive = false;
