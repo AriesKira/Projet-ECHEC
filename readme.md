@@ -15,7 +15,7 @@ Edouard ROUZE
 A noter : 
 
 - Le Roc n'a pas été fait car manque de temps
-- Il est possible que le jeu crash lorsqu'il y a échec et que vous essayer de séléctionner une autre pièce que le roi jsp pk et c chiant car on devrait pouvoir protéger mais sa marche pas 
+- Il est possible que le jeu crash lorsqu'il y a échec et que vous essayer de séléctionner un pion ou une reine 
 
 
 

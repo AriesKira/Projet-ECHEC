@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
     int chosenPawn;
     int targetPawn;
 
-    pawnArray = malloc(sizeof(pawn)*5);
+    pawnArray = malloc(sizeof(pawn)*32);
     pawn LWknight;
     pawn RWknight;
     pawn LBknight;
