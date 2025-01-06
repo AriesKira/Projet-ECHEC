@@ -18,7 +18,3 @@ A noter :
 
 
 
-le Mode VS IA n'a pas été fait car manque de temps
-le multijouer na pas été fait par manque de temps
-
-
