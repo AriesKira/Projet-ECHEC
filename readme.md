@@ -1,7 +1,6 @@
 Fait par :
 Nathan EVRARD DA CUNHA
 Gil LINHARES
-Edouard ROUZE
 
 
 --------------------UTILISATION----------------------------
